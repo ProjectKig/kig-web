@@ -9,7 +9,6 @@ jobs:
 cache: cargo
 install:
   - rustup component add clippy
-  - apt-get install -y protobuf-compiler
 script:
   - RUSTFLAGS=-Dwarnings cargo clippy
   - cargo test --verbose
