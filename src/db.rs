@@ -1,4 +1,4 @@
-use actix_web::{App, HttpServer};
+use mongodb::Client;
 
 // Copyright (C) 2021 RoccoDev
 //
@@ -15,16 +15,18 @@ use actix_web::{App, HttpServer};
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-use std::io;
+use mongodb::error::Result;
 
-mod db;
+pub struct DbHandle {
+    client: Client,
+}
 
-#[actix_web::main]
-async fn main() -> io::Result<()> {
-    let port = std::env::var("KIG_PORT").unwrap_or_else(|_| String::from("3233"));
-    let host = std::env::var("KIG_HOST").unwrap_or_else(|_| String::from("127.0.0.1"));
-    HttpServer::new(|| App::new())
-        .bind(format!("{}:{}", host, port))?
-        .run()
-        .await
+impl DbHandle {
+    pub async fn new() -> Result<DbHandle> {
+        let uri = std::env::var("KIG_MONGO_URI")
+            .unwrap_or_else(|_| String::from("mongodb://localhost:27017"));
+        Ok(DbHandle {
+            client: Client::with_uri_str(&uri).await?,
+        })
+    }
 }

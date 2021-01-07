@@ -9,7 +9,7 @@ edition = "2018"
 tokio = { version = "1", features = ["full"] }
 
 # Database
-mongodb = { version = "1.1.1", default-features = false, features = ["async-std-runtime"]}
+mongodb = { version = "1.1.1", default-features = false, features = ["tokio-runtime"]}
 
 # Web server
 askama = "0.10"
