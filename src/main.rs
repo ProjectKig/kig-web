@@ -1,4 +1,5 @@
 use actix_web::{App, HttpServer};
+use db::DbHandle;
 
 // Copyright (C) 2021 RoccoDev
 //
@@ -16,14 +17,38 @@ use actix_web::{App, HttpServer};
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use std::io;
+use std::sync::Arc;
 
 mod db;
+mod error;
+mod protos;
+mod web;
+
+#[derive(Clone)]
+struct AppState {
+    pub db: Arc<DbHandle>,
+}
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
     let port = std::env::var("KIG_PORT").unwrap_or_else(|_| String::from("3233"));
     let host = std::env::var("KIG_HOST").unwrap_or_else(|_| String::from("127.0.0.1"));
-    HttpServer::new(|| App::new())
+
+    // Application state
+    let db = Arc::new(DbHandle::new().await.unwrap());
+    let state = AppState { db };
+
+    println!(
+        "{:?}",
+        state
+            .db
+            .game_log_by_id("cai", vec![0x48, 0xc9, 0x6d, 0xaf, 0x5d, 0x72])
+            .await
+            .unwrap()
+            .unwrap()
+    );
+
+    HttpServer::new(move || App::new().data(state.clone()))
         .bind(format!("{}:{}", host, port))?
         .run()
         .await
