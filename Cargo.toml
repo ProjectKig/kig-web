@@ -17,6 +17,7 @@ base62 = "0.3"
 
 # Web server
 askama = "0.10"
+askama_derive = "0.10"
 actix-web = "3"
 cached = "0.22"
 

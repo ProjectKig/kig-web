@@ -1,0 +1,19 @@
+{% let map = log.get_cai().get_map() %}
+{% let teams = log.get_teams() %}
+{% let events = log.get_events() %}
+
+<h1>{{ map }}</h1>
+<p>Winner: {% if log.has_winner() %} {{ log.get_winner() }} {% else %} Tie {% endif %}</p>
+
+<h2>Teams</h2>
+{% for team in teams %}
+<h3>{{ team.get_name() }} ({{ team.get_score() }})</h3>
+{% for player in team.get_players() %}
+<p>{{ player.get_name() }}</p>
+{% endfor %}
+{% endfor %}
+
+<h2>Events</h2>
+{% for time_evt in events %}
+<p>{{ time_evt.get_time() }}</p>
+{% endfor %}

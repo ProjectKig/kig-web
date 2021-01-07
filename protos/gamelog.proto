@@ -38,7 +38,7 @@ message GameLog {
 
   // extensions 100 to max;
   // Add extensions here instead
-  optional CaiExtension ext_cai = 110;
+  oneof extension { CaiExtension cai = 110; }
 }
 
 message CaiExtension { required string map = 1; }
@@ -48,13 +48,15 @@ message CaiExtension { required string map = 1; }
 message GameEvent {
   // extensions 100 to max;
   // Add extensions here instead
-  optional ChatEvent evt_chat = 100;
-  optional JoinEvent evt_join = 101;
-  optional LeaveEvent evt_leave = 102;
-  optional CatchEvent evt_catch = 110;
-  optional EscapeEvent evt_escape = 111;
-  optional CaptureEvent evt_capture = 112;
-  optional DeathEvent evt_death = 113;
+  oneof extension {
+    ChatEvent Chat = 100;
+    JoinEvent Join = 101;
+    LeaveEvent Leave = 102;
+    CatchEvent Catch = 110;
+    EscapeEvent Escape = 111;
+    CaptureEvent Capture = 112;
+    DeathEvent Death = 113;
+  }
 }
 
 message ChatEvent {

@@ -15,7 +15,15 @@
 
 use crate::{error::Result, protos::gamelog::GameLog, AppState};
 use actix_web::{web, HttpResponse};
+use askama::Template;
 use cached::{proc_macro::cached, TimedCache};
+
+#[derive(Template)]
+#[template(path = "gamelog.html")]
+struct GamelogTemplate<'a> {
+    log: &'a GameLog,
+}
+
 #[cached(
     type = "TimedCache<Vec<u8>, GameLog>",
     create = "{ TimedCache::with_lifespan(120) }",
@@ -37,7 +45,8 @@ pub async fn gamelog_id(
     match base62::decode(&id) {
         Ok(id) => {
             let log = get_log(state, id.to_be_bytes()[2..].to_vec()).await?;
-            Ok(HttpResponse::Ok().body(format!("{:?}", log)))
+            let render = GamelogTemplate { log: &log }.render().unwrap();
+            Ok(HttpResponse::Ok().body(render))
         }
         Err(_) => Ok(HttpResponse::BadRequest().body("Invalid game ID")),
     }

@@ -1254,6 +1254,7 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "askama",
+ "askama_derive",
  "base62",
  "cached",
  "mongodb",
