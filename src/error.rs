@@ -13,6 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+use std::fmt::Display;
+
+use actix_web::{dev::Body, http::StatusCode, HttpResponse, ResponseError};
 use mongodb::bson::document::ValueAccessError;
 use protobuf::ProtobufError;
 
@@ -23,6 +26,32 @@ pub enum Error {
     Database(mongodb::error::Error),
     MongoDeserialize(ValueAccessError),
     Protobuf(ProtobufError),
+    NotFound,
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl ResponseError for Error {
+    fn status_code(&self) -> actix_web::http::StatusCode {
+        match self {
+            Error::NotFound => StatusCode::NOT_FOUND,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+
+    fn error_response(&self) -> actix_web::HttpResponse {
+        HttpResponse::new(self.status_code()).set_body(Body::from_slice(
+            match self {
+                Error::NotFound => "Not found",
+                _ => "Internal error. Please contact the server's administrators.",
+            }
+            .as_bytes(),
+        ))
+    }
 }
 
 impl From<mongodb::error::Error> for Error {

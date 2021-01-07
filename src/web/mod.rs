@@ -12,3 +12,11 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+use actix_web::{web, Scope};
+
+mod gamelog;
+
+pub fn add_routes() -> Scope {
+    web::scope("/").route("/game/{id}", web::get().to(gamelog::gamelog_id))
+}

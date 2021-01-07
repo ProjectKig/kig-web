@@ -25,7 +25,7 @@ mod protos;
 mod web;
 
 #[derive(Clone)]
-struct AppState {
+pub struct AppState {
     pub db: Arc<DbHandle>,
 }
 
@@ -38,17 +38,7 @@ async fn main() -> io::Result<()> {
     let db = Arc::new(DbHandle::new().await.unwrap());
     let state = AppState { db };
 
-    println!(
-        "{:?}",
-        state
-            .db
-            .game_log_by_id("cai", vec![0x48, 0xc9, 0x6d, 0xaf, 0x5d, 0x72])
-            .await
-            .unwrap()
-            .unwrap()
-    );
-
-    HttpServer::new(move || App::new().data(state.clone()))
+    HttpServer::new(move || App::new().data(state.clone()).service(web::add_routes()))
         .bind(format!("{}:{}", host, port))?
         .run()
         .await

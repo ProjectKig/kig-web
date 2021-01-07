@@ -11,12 +11,14 @@ tokio = { version = "1", features = ["full"] }
 # Database
 mongodb = { version = "1.1.1", default-features = false, features = ["tokio-runtime"]}
 
-# Gamelog deserialization
-protobuf = "2"
+# Gamelogs
+protobuf = "2.20"
+base62 = "0.3"
 
 # Web server
 askama = "0.10"
 actix-web = "3"
+cached = "0.22"
 
 [build-dependencies]
 # Gamelog deserialization

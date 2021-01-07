@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::error::Result;
-use crate::protos::gamelog_core::GameLog;
+use crate::protos::gamelog::GameLog;
 use mongodb::bson::{bson, doc};
 use mongodb::{
     bson::{Binary, Bson},
