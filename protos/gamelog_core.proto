@@ -1,0 +1,73 @@
+syntax = "proto2";
+
+package kigcore;
+
+option java_package = "dev.rocco.kig.core.mode.logging";
+option java_outer_classname = "GameLogProtocol";
+
+message Player {
+  required bytes uuid = 1;
+  required string name = 2;
+}
+
+message Team {
+  required string name = 1;
+  required int32 score = 2;
+  repeated Player players = 3;
+}
+
+message TimeEvent {
+  enum ModeState {
+    LOBBY = 1;
+    WARMUP = 2;
+    GAME = 3;
+    ENDGAME = 4;
+  }
+  required GameEvent event = 1;
+  required int32 time = 2;
+  required ModeState state = 3;
+}
+
+message GameEvent {
+  extensions 100 to max;
+}
+
+message ChatEvent {
+  enum ChatType {
+    LOBBY = 1;
+    TEAM = 2;
+    SHOUT = 3;
+    BROADCAST = 4;
+  }
+  extend GameEvent {
+    optional ChatEvent event = 100;
+  }
+  required string sender = 1;
+  required string message = 2;
+  required ChatType type = 3;
+}
+
+message JoinEvent {
+  extend GameEvent {
+    optional JoinEvent event = 101;
+  }
+  required string player = 1;
+  required int32 team = 2;
+}
+
+message LeaveEvent {
+  extend GameEvent {
+    optional LeaveEvent event = 102;
+  }
+  required string player = 1;
+}
+
+message GameLog {
+  repeated Team teams = 1;
+  optional string winner = 2;
+  required int64 game_start = 3;
+  required int64 game_end = 4;
+  required int32 start_players = 5;
+  repeated TimeEvent events = 6;
+  extensions 100 to max;
+}
