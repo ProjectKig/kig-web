@@ -25,3 +25,7 @@ pub fn add_routes() -> Scope {
 pub fn static_files() -> Files {
     Files::new("/static", "static").show_files_listing()
 }
+
+pub fn images() -> Files {
+    Files::new("/img", "img")
+}

@@ -16,9 +16,9 @@
 use crate::{
     error::Result,
     protos::gamelog::{
-        DeathEvent_DeathCause,
+        ChatEvent_ChatType, DeathEvent_DeathCause,
         GameEvent_oneof_extension::{self, *},
-        GameLog, TimeEvent, TimeEvent_ModeState,
+        GameLog, TimeEvent,
     },
     AppState,
 };
@@ -26,7 +26,7 @@ use actix_web::{web, HttpResponse};
 use askama::Template;
 use cached::{proc_macro::cached, TimedCache};
 use regex::Regex;
-use std::{convert::TryInto, fmt};
+use std::{collections::HashMap, convert::TryInto, fmt};
 
 lazy_static::lazy_static! {
     static ref MAP_ESCAPE_REGEX: Regex = Regex::new(r#"[^a-zA-Z0-9]"#).unwrap();
@@ -40,6 +40,7 @@ struct GamelogTemplate<'a> {
     game_id: &'a str,
     teams: Vec<Team<'a>>,
     events: Vec<WrappedEvent<'a>>,
+    player_teams: HashMap<&'a str, &'a str>,
 }
 
 /// Represents a Java UUID
@@ -108,6 +109,15 @@ pub async fn gamelog_id(
                 game_id: &path_id,
                 teams,
                 events: log.get_events().iter().map(|e| WrappedEvent(e)).collect(),
+                player_teams: log
+                    .get_teams()
+                    .iter()
+                    .flat_map(|t| {
+                        t.get_players()
+                            .iter()
+                            .map(move |p| (p.get_name(), t.get_name()))
+                    })
+                    .collect(),
             }
             .render()
             .unwrap();
@@ -120,10 +130,6 @@ pub async fn gamelog_id(
 impl<'a> WrappedEvent<'a> {
     fn get_time(&self) -> i32 {
         self.0.get_time()
-    }
-
-    fn get_state(&self) -> TimeEvent_ModeState {
-        self.0.get_state()
     }
 
     fn get_raw_event(&self) -> &GameEvent_oneof_extension {
@@ -152,6 +158,15 @@ impl<'a> WrappedEvent<'a> {
             DeathEvent_DeathCause::FIRE_TICK => "Fire",
             DeathEvent_DeathCause::OTHER => "Unknown cause",
         }
+    }
+
+    fn get_chat_channel(&self, player: &str, player_teams: &HashMap<&str, &str>) -> String {
+        String::from(match self.0.get_event().get_Chat().get_field_type() {
+            ChatEvent_ChatType::LOBBY => "Lobby",
+            ChatEvent_ChatType::TEAM => player_teams.get(player).unwrap_or(&"Spec"),
+            ChatEvent_ChatType::SHOUT => "Shout",
+            ChatEvent_ChatType::BROADCAST => "Broadcast",
+        })
     }
 
     fn is_chat(&self) -> bool {

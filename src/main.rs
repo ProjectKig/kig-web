@@ -42,6 +42,7 @@ async fn main() -> io::Result<()> {
         App::new()
             .data(state.clone())
             .service(web::static_files())
+            .service(web::images())
             .service(web::add_routes())
     })
     .bind(format!("{}:{}", host, port))?
