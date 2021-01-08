@@ -18,6 +18,13 @@
             <img src="/img/maps/{{ map|map_file_name }}.png" class="card-img-top" alt="Map thumbnail">
             <div class="card-body">
                 <h5 class="card-title text-center">{{ map }}</h5>
+                <p class="card-text text-center"><small class="text-muted">
+                        Screenshots: <a class="text-dark"
+                            href="https://namemc.com/profile/755825c7f221403b9a0645d3debb9555">xqnnyz</a>, <a
+                            class="text-dark"
+                            href="https://namemc.com/profile/e5a4fcc78aa04c37a69d8bb1ff9d52b4">_Til</a>
+                    </small>
+                </p>
             </div>
         </div>
     </div>
@@ -25,7 +32,8 @@
         <div class="row">
             <div class="col">
                 <h2 class="display-6 text-center"><strong>Winner:</strong> {% if log.has_winner() %}
-                    {{ log.get_winner() }} {% else %}
+                    {% let team = winner.unwrap() %}
+                    <strong style="color: {{ team.color }}">{{ team.name }}</strong> {% else %}
                     Tie
                     {% endif %}</h2>
             </div>
@@ -39,10 +47,10 @@
                     <span class="align-middle"></span>
                     <script
                         type="text/javascript">document.write(new Date({{ log.get_game_start() }}).toLocaleString())</script>
-                    <small>(Your time)</small>
-                </span>&nbsp;
+                    <small>(Your time)</small></span>&nbsp;
                 <span class="text-outline darkgreen"><i class="align-middle ri-timer-line"></i>
-                    <span class="align-middle">{{ duration|format_duration }}
+                    <span class="align-middle">{{ duration|format_duration }}</span>
+                </span>
             </div>
         </div>
     </div>
@@ -56,7 +64,8 @@
                     <button class="accordion-button team-info" type="button" data-bs-toggle="collapse"
                         data-bs-target="#accord-data-{{ team.name }}" aria-expanded="true"
                         aria-controls="accord-data-{{ team.name }}">
-                        {{ team.name }} ({{ team.players.len() }}) <span
+                        <span style="color: {{team.color}}"><strong>{{ team.name }}</strong>
+                            ({{ team.players.len() }})</span> <span
                             class="badge rounded-pill float-end bg-{% if !log.has_winner() %}warning{% else if log.get_winner() == team.name %}success{% else %}danger{% endif %}">{{ team.score }}</span>
                     </button>
                 </h2>
@@ -112,38 +121,62 @@
                         <span>
                             {% match time_evt.get_raw_event() %}
                             {% when Chat with (chat) %}
+                            {% let channel = time_evt.get_chat_channel(chat.get_sender(), player_teams) %}
+                            {% match channel %}
+                            {% when ChatChannel::Static with (name) %}
+                            <span class="badge rounded-pill bg-dark">{{ name }}</span>
+                            {% when ChatChannel::Team with (name, color) %}
+                            <span class="badge rounded-pill bg-dark"
+                                style="background-color: '{{color}}' !important;">{{ name }}</span>
+                            {% endmatch %}
                             <span
-                                class="badge rounded-pill bg-dark">{{ time_evt.get_chat_channel(chat.get_sender(), player_teams) }}</span>
-                            <strong>{{ chat.get_sender() }}</strong>: {{ chat.get_message() }}
+                                style="color: {{chat.get_sender()|team_color(player_teams)}};"><strong>{{ chat.get_sender() }}</strong></span>:
+                            {{ chat.get_message() }}
                             {% when Join with (join) %}
                             <i class="align-middle ri-user-add-fill"></i>
-                            <strong>{{ join.get_player() }}</strong> joined the <strong>{{ join.get_team() }}</strong>
+                            <strong>{{ join.get_player() }}</strong> joined the <strong
+                                style="color: {{join.get_player()|team_color(player_teams)}};">{{ join.get_team() }}</strong>
                             team.
                             {% when Leave with (leave) %}
                             <i class="align-middle ri-user-unfollow-fill"></i>
-                            <strong>{{ leave.get_player() }}</strong> left.
+                            <strong
+                                style="color: {{leave.get_player()|team_color(player_teams)}};">{{ leave.get_player() }}</strong>
+                            left.
                             {% when Catch with (catch) %}
                             <i class="align-middle ri-eye-fill"></i>
-                            <strong>{{ catch.get_leader() }}</strong> was caught by
-                            <strong>{{ catch.get_carrier() }}</strong>.
+                            <strong
+                                style="color: {{catch.get_leader()|team_color(player_teams)}};">{{ catch.get_leader() }}</strong>
+                            was caught by
+                            <strong
+                                style="color: {{catch.get_carrier()|team_color(player_teams)}};">{{ catch.get_carrier() }}</strong>.
                             {% when Escape with (escape) %}
                             <i
                                 class="align-middle ri-{% if escape.has_saver() %}shield-star-fill{% else %}eye-off-fill{% endif %}"></i>
-                            <strong>{{ escape.get_leader() }}</strong> escaped.
+                            <strong
+                                style="color: {{escape.get_leader()|team_color(player_teams)}};">{{ escape.get_leader() }}</strong>
+                            escaped.
                             <span class="badge rounded-pill bg-primary">{% if escape.has_saver() %}Saved by
                                 <strong>{{ escape.get_saver() }}</strong>{% else if escape.has_chance() %}Rolled
                                 {{ "{:.1}"|format(escape.get_chance()) }}%{% endif %}</span>
                             {% when Capture with (capture) %}
                             <i class="align-middle ri-star-fill"></i>
-                            <strong>{{ capture.get_leader() }}</strong> was captured by
-                            <strong>{{ capture.get_carrier() }}</strong>.
+                            <strong
+                                style="color: {{capture.get_leader()|team_color(player_teams)}};">{{ capture.get_leader() }}</strong>
+                            was captured by
+                            <strong
+                                style="color: {{capture.get_carrier()|team_color(player_teams)}};">{{ capture.get_carrier() }}</strong>.
                             {% when Death with (death) %}
                             <i class="align-middle ri-close-line"></i>
                             {% if death.has_killer() %}
-                            <strong>{{ death.get_player() }}</strong> was killed by
-                            <strong>{{ death.get_killer() }}</strong>.
+                            <strong
+                                style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
+                            was killed by
+                            <strong
+                                style="color: {{death.get_killer()|team_color(player_teams)}};">{{ death.get_killer() }}</strong>.
                             {% else %}
-                            <strong>{{ death.get_player() }}</strong> died.
+                            <strong
+                                style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
+                            died.
                             {% endif %}
                             <span class="badge rounded-pill bg-secondary">{{ time_evt.get_kill_description() }}</span>
                             {% endmatch %}

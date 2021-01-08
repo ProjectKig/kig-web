@@ -16,7 +16,7 @@
 use crate::{
     error::Result,
     protos::gamelog::{
-        ChatEvent_ChatType, DeathEvent_DeathCause,
+        self, ChatEvent_ChatType, DeathEvent_DeathCause,
         GameEvent_oneof_extension::{self, *},
         GameLog, TimeEvent,
     },
@@ -30,7 +30,14 @@ use std::{collections::HashMap, convert::TryInto, fmt};
 
 lazy_static::lazy_static! {
     static ref MAP_ESCAPE_REGEX: Regex = Regex::new(r#"[^a-zA-Z0-9]"#).unwrap();
+    static ref SPECTATORS: Team<'static> = Team {
+      name: "Spec",
+      players: vec![],
+      score: 0,
+      color: mc_to_rgb('7')
+    };
 }
+static DEFAULT_COLORS: [char; 2] = ['c', 'e'];
 
 #[derive(Template)]
 #[template(path = "gamelog.html")]
@@ -40,27 +47,37 @@ struct GamelogTemplate<'a> {
     game_id: &'a str,
     teams: Vec<Team<'a>>,
     events: Vec<WrappedEvent<'a>>,
-    player_teams: HashMap<&'a str, &'a str>,
+    player_teams: HashMap<&'a str, &'a Team<'a>>,
+    winner: Option<&'a Team<'a>>,
 }
 
 /// Represents a Java UUID
-struct UUID {
+#[derive(Clone, Copy)]
+pub struct UUID {
     lsb: u64,
     msb: u64,
 }
 
-struct Player<'a> {
+#[derive(Clone, Copy)]
+pub struct Player<'a> {
     pub uuid: UUID,
     pub name: &'a str,
 }
 
-struct Team<'a> {
+#[derive(Clone)]
+pub struct Team<'a> {
     pub name: &'a str,
     pub players: Vec<Player<'a>>,
     pub score: i32,
+    pub color: &'static str,
 }
 
 struct WrappedEvent<'a>(&'a TimeEvent);
+
+enum ChatChannel<'a> {
+    Static(&'static str),
+    Team(&'a str, &'static str),
+}
 
 #[cached(
     type = "TimedCache<Vec<u8>, GameLog>",
@@ -83,12 +100,14 @@ pub async fn gamelog_id(
     match base62::decode(&path_id) {
         Ok(id) => {
             let log = get_log(state, id.to_be_bytes()[2..].to_vec()).await?;
-            let teams = log
+            let teams: Vec<Team> = log
                 .get_teams()
                 .iter()
-                .map(|t| Team {
+                .enumerate()
+                .map(|(i, t)| Team {
                     name: t.get_name(),
                     score: t.get_score(),
+                    color: get_team_color(t, i),
                     players: t
                         .get_players()
                         .iter()
@@ -99,6 +118,11 @@ pub async fn gamelog_id(
                         .collect(),
                 })
                 .collect();
+            let winner = teams.iter().filter(|t| t.name == log.get_winner()).next();
+            let player_teams = teams
+                .iter()
+                .flat_map(|t| t.players.iter().map(move |p| (p.name, t)))
+                .collect();
             let render = GamelogTemplate {
                 log: &log,
                 total_players: if log.get_start_players() == 0 {
@@ -107,17 +131,10 @@ pub async fn gamelog_id(
                     log.get_start_players() as usize
                 },
                 game_id: &path_id,
-                teams,
+                teams: teams.clone(),
                 events: log.get_events().iter().map(|e| WrappedEvent(e)).collect(),
-                player_teams: log
-                    .get_teams()
-                    .iter()
-                    .flat_map(|t| {
-                        t.get_players()
-                            .iter()
-                            .map(move |p| (p.get_name(), t.get_name()))
-                    })
-                    .collect(),
+                player_teams,
+                winner,
             }
             .render()
             .unwrap();
@@ -160,13 +177,20 @@ impl<'a> WrappedEvent<'a> {
         }
     }
 
-    fn get_chat_channel(&self, player: &str, player_teams: &HashMap<&str, &str>) -> String {
-        String::from(match self.0.get_event().get_Chat().get_field_type() {
-            ChatEvent_ChatType::LOBBY => "Lobby",
-            ChatEvent_ChatType::TEAM => player_teams.get(player).unwrap_or(&"Spec"),
-            ChatEvent_ChatType::SHOUT => "Shout",
-            ChatEvent_ChatType::BROADCAST => "Broadcast",
-        })
+    fn get_chat_channel(
+        &self,
+        player: &str,
+        player_teams: &'a HashMap<&str, &Team<'a>>,
+    ) -> ChatChannel<'a> {
+        match self.0.get_event().get_Chat().get_field_type() {
+            ChatEvent_ChatType::LOBBY => ChatChannel::Static("Lobby"),
+            ChatEvent_ChatType::TEAM => player_teams
+                .get(player)
+                .map(|&x| ChatChannel::Team(x.name, x.color))
+                .unwrap_or_else(|| ChatChannel::Team(SPECTATORS.name, SPECTATORS.color)),
+            ChatEvent_ChatType::SHOUT => ChatChannel::Static("Shout"),
+            ChatEvent_ChatType::BROADCAST => ChatChannel::Static("Broadcast"),
+        }
     }
 
     fn is_chat(&self) -> bool {
@@ -198,6 +222,37 @@ impl fmt::Display for UUID {
     }
 }
 
+fn get_team_color(team: &gamelog::Team, idx: usize) -> &'static str {
+    mc_to_rgb(if team.has_color() {
+        team.get_color() as u8 as char
+    } else {
+        DEFAULT_COLORS[idx]
+    })
+}
+
+/// Converts a Minecraft color to an RGB for CSS
+#[inline]
+fn mc_to_rgb(mc: char) -> &'static str {
+    match mc {
+        '1' => "#0000AA",
+        '2' => "#00AA00",
+        '3' => "#00AAAA",
+        '4' => "#AA0000",
+        '5' => "#AA00AA",
+        '6' => "#FFAA00",
+        '7' => "#AAAAAA",
+        '8' => "#555555",
+        '9' => "#5555FF",
+        'a' | 'A' => "#55FF55",
+        'b' | 'B' => "#55FFFF",
+        'c' | 'C' => "#e00b0b",
+        'd' | 'D' => "#FF55FF",
+        'e' | 'E' => "#cc901e",
+        'f' | 'F' => "#FFFFFF",
+        _ => "#000000",
+    }
+}
+
 fn digits(val: u64, n: usize) -> String {
     let high = 1u64 << n * 4usize;
     format!("{:x}", (high | val & high - 1u64))
@@ -210,6 +265,10 @@ fn format_duration(millis: i32) -> String {
 }
 
 mod filters {
+    use std::{borrow::Cow, collections::HashMap};
+
+    use super::Team;
+
     pub fn format_duration(millis: &i64) -> askama::Result<String> {
         Ok(super::format_duration(*millis as i32))
     }
@@ -222,5 +281,15 @@ mod filters {
         let mut res: String = super::MAP_ESCAPE_REGEX.replace_all(map_name, "").into();
         res.make_ascii_lowercase();
         Ok(res)
+    }
+
+    pub fn team_color<'a>(
+        player: &'a str,
+        player_teams: &'a HashMap<&str, &Team<'a>>,
+    ) -> askama::Result<Cow<'a, str>> {
+        Ok(match player_teams.get(player).map(|t| t.color) {
+            Some(color) => Cow::Owned(format!("{} !important", color)),
+            None => Cow::Borrowed("#000000"),
+        })
     }
 }
