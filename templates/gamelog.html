@@ -112,7 +112,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row mb-3">
             <div class="col">
                 <ul class="list-group" id="events">
                     {% for time_evt in events %}
@@ -127,15 +127,17 @@
                             <span class="badge rounded-pill bg-dark">{{ name }}</span>
                             {% when ChatChannel::Team with (name, color) %}
                             <span class="badge rounded-pill bg-dark"
-                                style="background-color: '{{color}}' !important;">{{ name }}</span>
+                                style="background-color: {{color}} !important;">{{ name }}</span>
                             {% endmatch %}
                             <span
                                 style="color: {{chat.get_sender()|team_color(player_teams)}};"><strong>{{ chat.get_sender() }}</strong></span>:
                             {{ chat.get_message() }}
                             {% when Join with (join) %}
+                            {% let jt = join.get_team() %}
+                            {% let team = jt|team_from_idx(teams) %}
                             <i class="align-middle ri-user-add-fill"></i>
                             <strong>{{ join.get_player() }}</strong> joined the <strong
-                                style="color: {{join.get_player()|team_color(player_teams)}};">{{ join.get_team() }}</strong>
+                                style="color: {{team.color}};">{{ team.name }}</strong>
                             team.
                             {% when Leave with (leave) %}
                             <i class="align-middle ri-user-unfollow-fill"></i>

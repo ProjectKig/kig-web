@@ -254,8 +254,8 @@ fn mc_to_rgb(mc: char) -> &'static str {
 }
 
 fn digits(val: u64, n: usize) -> String {
-    let high = 1u64 << n * 4usize;
-    format!("{:x}", (high | val & high - 1u64))
+    let high = 1u64 << (n * 4usize);
+    format!("{:x}", (high | val & (high - 1u64)))
 }
 
 fn format_duration(millis: i32) -> String {
@@ -281,6 +281,10 @@ mod filters {
         let mut res: String = super::MAP_ESCAPE_REGEX.replace_all(map_name, "").into();
         res.make_ascii_lowercase();
         Ok(res)
+    }
+
+    pub fn team_from_idx<'a>(idx: &'a i32, teams: &'a [Team<'a>]) -> askama::Result<&'a Team<'a>> {
+        Ok(teams.get(*idx as usize).unwrap_or(&super::SPECTATORS))
     }
 
     pub fn team_color<'a>(
