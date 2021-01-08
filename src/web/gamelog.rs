@@ -40,13 +40,16 @@ async fn get_log(state: web::Data<AppState>, id: Vec<u8>) -> Result<GameLog> {
 
 pub async fn gamelog_id(
     state: web::Data<AppState>,
-    web::Path(id): web::Path<String>,
+    web::Path(path_id): web::Path<String>,
 ) -> Result<HttpResponse> {
-    match base62::decode(&id) {
+    match base62::decode(&path_id) {
         Ok(id) => {
             let log = get_log(state, id.to_be_bytes()[2..].to_vec()).await?;
             let render = GamelogTemplate { log: &log }.render().unwrap();
-            Ok(HttpResponse::Ok().body(render))
+            Ok(HttpResponse::Ok().body(crate::web::serve_html(
+                &format!("Game {}", path_id),
+                &render,
+            )))
         }
         Err(_) => Ok(HttpResponse::BadRequest().body("Invalid game ID")),
     }

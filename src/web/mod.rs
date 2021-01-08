@@ -13,10 +13,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+use actix_files::Files;
 use actix_web::{web, Scope};
+use askama::Template;
 
 mod gamelog;
 
+#[derive(Template)]
+#[template(path = "master-template.html", escape = "none")]
+struct MasterTemplate<'a> {
+    title: &'a str,
+    content: &'a str,
+}
+
 pub fn add_routes() -> Scope {
     web::scope("/").route("/game/{id}", web::get().to(gamelog::gamelog_id))
+}
+
+pub fn static_files() -> Files {
+    Files::new("/static", "static").show_files_listing()
+}
+
+pub fn serve_html(title: &str, content: &str) -> String {
+    MasterTemplate { title, content }.render().unwrap()
 }

@@ -38,8 +38,13 @@ async fn main() -> io::Result<()> {
     let db = Arc::new(DbHandle::new().await.unwrap());
     let state = AppState { db };
 
-    HttpServer::new(move || App::new().data(state.clone()).service(web::add_routes()))
-        .bind(format!("{}:{}", host, port))?
-        .run()
-        .await
+    HttpServer::new(move || {
+        App::new()
+            .data(state.clone())
+            .service(web::static_files())
+            .service(web::add_routes())
+    })
+    .bind(format!("{}:{}", host, port))?
+    .run()
+    .await
 }
