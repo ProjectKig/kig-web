@@ -1,6 +1,7 @@
 {% let map = log.get_cai().get_map() %}
 {% let teams = log.get_teams() %}
 {% let events = log.get_events() %}
+{% let duration = log.get_game_end() - log.get_game_start() %}
 <link href="/static/css/gamelog.css" rel="stylesheet">
 <div class="row mb-2">
     <h1 class="text-center display-5">Cowboys and Indians Game (ID)</h1>
@@ -26,77 +27,81 @@
         <div class="row mt-3">
             <div class="col text-center">
                 <span class="text-outline gold"><i class="align-middle ri-parent-fill"></i>
-                    <span class="align-middle">{{ log.get_start_players() }}</span></span>
+                    <span class="align-middle">{{ log.get_start_players() }}</span>
+                </span>&nbsp;
                 <span class="text-outline blue"><i class="align-middle ri-calendar-event-fill"></i>
-                    <span class="align-middle"></span>{{ log.get_game_start() }}</span></span>
+                    <span class="align-middle"></span>
+                    <script
+                        type="text/javascript">document.write(new Date({{ log.get_game_start() }}).toLocaleString())</script>
+                    <small>(Your time)</small>
+                </span>&nbsp;
                 <span class="text-outline darkgreen"><i class="align-middle ri-timer-line"></i>
-                    <span class="align-middle">{{ log.get_game_end() - log.get_game_start() }}</span></span>
+                    <span class="align-middle">{{ duration|format_duration }}
             </div>
         </div>
     </div>
-</div>
-<div class="row mt-3">
-    <div class="col-3">
-        <div class="accordion" id="teams" style="border: none;">
-            {% for team in teams %}
-            <div class="accordion-item border rounded mb-2">
-                <h2 class="accordion-header" id="accord-header-{{ team.get_name() }}">
-                    <button class="accordion-button team-info" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#accord-data-{{ team.get_name() }}" aria-expanded="true"
-                        aria-controls="accord-data-{{ team.get_name() }}">
-                        {{ team.get_name() }} ({{ team.get_players().len() }}) <span
-                            class="badge rounded-pill float-end bg-{% if !log.has_winner() %}warning{% else if log.get_winner() == team.get_name() %}success{% else %}danger{% endif %}">{{ team.get_score() }}</span>
-                    </button>
-                </h2>
-                <div id="accord-data-{{ team.get_name() }}" class="accordion-collapse collapse show"
-                    aria-labelledby="accord-header-{{ team.get_name() }}" data-bs-parent="#teams">
-                    <div class="accordion-body">
-                        <ul class="list-group">
-                            {% for player in team.get_players() %}
-                            <li class="list-group-item">
-                                <div class="row">
-                                    <div class="col-2">
-                                        <img alt="Skin"
-                                            src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7"
-                                            height="32">
+    <div class="row mt-3">
+        <div class="col-3">
+            <div class="accordion" id="teams" style="border: none;">
+                {% for team in teams %}
+                <div class="accordion-item border rounded mb-2">
+                    <h2 class="accordion-header" id="accord-header-{{ team.get_name() }}">
+                        <button class="accordion-button team-info" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#accord-data-{{ team.get_name() }}" aria-expanded="true"
+                            aria-controls="accord-data-{{ team.get_name() }}">
+                            {{ team.get_name() }} ({{ team.get_players().len() }}) <span
+                                class="badge rounded-pill float-end bg-{% if !log.has_winner() %}warning{% else if log.get_winner() == team.get_name() %}success{% else %}danger{% endif %}">{{ team.get_score() }}</span>
+                        </button>
+                    </h2>
+                    <div id="accord-data-{{ team.get_name() }}" class="accordion-collapse collapse show"
+                        aria-labelledby="accord-header-{{ team.get_name() }}" data-bs-parent="#teams">
+                        <div class="accordion-body">
+                            <ul class="list-group">
+                                {% for player in team.get_players() %}
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-2">
+                                            <img alt="Skin"
+                                                src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7"
+                                                height="32">
+                                        </div>
+                                        <div class="col">
+                                            <span class="align-middle">{{ player.get_name() }}</span>
+                                        </div>
                                     </div>
-                                    <div class="col">
-                                        <span class="align-middle">{{ player.get_name() }}</span>
-                                    </div>
-                                </div>
-                            </li>
-                            {% endfor %}
-                        </ul>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-8 border rounded">
+            <div class="row mt-3">
+                <div class="col">
+                    <p class="lead">Game events</p>
+                </div>
+                <div class="col">
+                    <div class="btn-group float-end" role="group" aria-label="Display controls">
+                        <button type="button" class="btn btn-outline-primary">All events</button>
+                        <button type="button" class="btn btn-outline-primary">Game only</button>
+                        <button type="button" class="btn btn-outline-primary">Chat only</button>
                     </div>
                 </div>
             </div>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="col-8 border rounded">
-        <div class="row mt-3">
-            <div class="col">
-                <p class="lead">Game events</p>
-            </div>
-            <div class="col">
-                <div class="btn-group float-end" role="group" aria-label="Display controls">
-                    <button type="button" class="btn btn-outline-primary">All events</button>
-                    <button type="button" class="btn btn-outline-primary">Game only</button>
-                    <button type="button" class="btn btn-outline-primary">Chat only</button>
+            <div class="row">
+                <div class="col">
+                    <ul class="list-group">
+                        {% for time_evt in events %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Cras justo odio
+                            <span class="badge text-dark">{{ time_evt.get_time()|format_duration_i32 }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col">
-                <ul class="list-group">
-                    {% for time_evt in events %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Cras justo odio
-                        <span class="badge text-dark">{{ time_evt.get_time() }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
     </div>
-</div>

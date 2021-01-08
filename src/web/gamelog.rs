@@ -54,3 +54,19 @@ pub async fn gamelog_id(
         Err(_) => Ok(HttpResponse::BadRequest().body("Invalid game ID")),
     }
 }
+
+fn format_duration(millis: i32) -> String {
+    let minutes = millis / (1000 * 60);
+    let seconds = millis / 1000 % 60;
+    format!("{:02}:{:02}", minutes, seconds)
+}
+
+mod filters {
+    pub fn format_duration(millis: &i64) -> askama::Result<String> {
+        Ok(super::format_duration(*millis as i32))
+    }
+
+    pub fn format_duration_i32(millis: &i32) -> askama::Result<String> {
+        Ok(super::format_duration(*millis))
+    }
+}
