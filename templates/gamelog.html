@@ -1,6 +1,13 @@
+{% extends "master-template.html" %}
+{% block title %}Game {{ game_id }}{% endblock %}
+
+{% block head %}
+<link href="/static/css/gamelog.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
 {% let map = log.get_cai().get_map() %}
 {% let duration = log.get_game_end() - log.get_game_start() %}
-<link href="/static/css/gamelog.css" rel="stylesheet">
 <div class="row mb-2">
     <h1 class="text-center display-5">Cowboys and Indians Game <small>{{ game_id }}</small>
     </h1>
@@ -84,18 +91,23 @@
             </div>
             <div class="col">
                 <div class="btn-group float-end" role="group" aria-label="Display controls">
-                    <button type="button" class="btn btn-outline-primary">All events</button>
-                    <button type="button" class="btn btn-outline-primary">Game only</button>
-                    <button type="button" class="btn btn-outline-primary">Chat only</button>
+                    <input type="radio" class="btn-check" name="events-ctrl" id="allevents" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary" for="allevents">All events</label>
+
+                    <input type="radio" class="btn-check" name="events-ctrl" id="gameonly" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="gameonly">Game only</label>
+
+                    <input type="radio" class="btn-check" name="events-ctrl" id="chatonly" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="chatonly">Chat only</label>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col">
-                <ul class="list-group">
+                <ul class="list-group" id="events">
                     {% for time_evt in events %}
-                    <li
-                        class="list-group-item d-flex justify-content-between align-items-center {{ time_evt.get_box_color() }}">
+                    <li class="list-group-item {% if time_evt.is_chat() %}log-chat-entry{% else %}log-entry{% endif %}
+                         d-flex justify-content-between align-items-center {{ time_evt.get_box_color() }}">
                         <span>
                             {% match time_evt.get_raw_event() %}
                             {% when Chat with (chat) %}
@@ -141,3 +153,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="/static/js/gamelog.js"></script>
+{% endblock %}

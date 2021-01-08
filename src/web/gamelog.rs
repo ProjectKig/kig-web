@@ -111,10 +111,7 @@ pub async fn gamelog_id(
             }
             .render()
             .unwrap();
-            Ok(HttpResponse::Ok().body(crate::web::serve_html(
-                &format!("Game {}", path_id),
-                &render,
-            )))
+            Ok(HttpResponse::Ok().body(render))
         }
         Err(_) => Ok(HttpResponse::BadRequest().body("Invalid game ID")),
     }
@@ -155,6 +152,10 @@ impl<'a> WrappedEvent<'a> {
             DeathEvent_DeathCause::FIRE_TICK => "Fire",
             DeathEvent_DeathCause::OTHER => "Unknown cause",
         }
+    }
+
+    fn is_chat(&self) -> bool {
+        self.0.get_event().has_Chat()
     }
 }
 
