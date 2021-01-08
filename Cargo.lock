@@ -1287,9 +1287,11 @@ dependencies = [
  "askama_derive",
  "base62",
  "cached",
+ "lazy_static",
  "mongodb",
  "protobuf",
  "protobuf-codegen-pure",
+ "regex",
  "tokio 1.0.1",
 ]
 
