@@ -118,7 +118,7 @@ pub async fn gamelog_id(
                         .collect(),
                 })
                 .collect();
-            let winner = teams.iter().filter(|t| t.name == log.get_winner()).next();
+            let winner = teams.iter().find(|t| t.name == log.get_winner());
             let player_teams = teams
                 .iter()
                 .flat_map(|t| t.players.iter().map(move |p| (p.name, t)))
