@@ -47,6 +47,11 @@ body {
 	border-color: #0d5899
 }
 
+[data-theme=dark] .blue {
+	color: #1684e3;
+	border-color: #1684e3
+}
+
 .darkblue {
 	color: #062844;
 	border-color: #062844
@@ -60,6 +65,11 @@ body {
 .darkgreen {
 	color: #06660a;
 	border-color: #06660a
+}
+
+[data-theme=dark] .darkgreen {
+	color: #06b30d;
+	border-color: #06b30d
 }
 
 .lightpurple {
