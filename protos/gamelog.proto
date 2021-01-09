@@ -70,6 +70,7 @@ message ChatEvent {
   required string sender = 1;
   required string message = 2;
   required ChatType type = 3;
+  optional int32 count = 4;
 }
 
 message JoinEvent {

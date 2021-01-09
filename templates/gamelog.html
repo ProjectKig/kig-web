@@ -132,6 +132,10 @@
                             <span
                                 style="color: {{chat.get_sender()|team_color(player_teams)}};"><strong>{{ chat.get_sender() }}</strong></span>:
                             {{ chat.get_message() }}
+                            {% let count = chat.get_count() %}
+                            {% if count > 1 %}
+                            <span class="badge rounded-pill bg-warning text-dark">x{{ count }}</span>
+                            {% endif %}
                             {% when Join with (join) %}
                             {% let jt = join.get_team() %}
                             {% let team = jt|team_from_idx(teams) %}
