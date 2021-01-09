@@ -3,6 +3,13 @@
 
 {% block head %}
 <link href="/static/css/gamelog.css" rel="stylesheet">
+<meta property="og:title" content="Cowboys and Indians: Game {{ game_id }}">
+<meta property="og:url" content="https://cai.rip/game/{{ game_id }}">
+<meta property="og:image" content="https://cai.rip/img/{{ map|map_file_name }}.png">
+<meta property="og:description"
+    content="Read the overview of this game of Cowboys and Indians on {{ map }}. Or play by connecting to cai.rip.">
+<meta property="og:site_name" content="Kig CAI">
+<meta name="twitter:card" content="summary">
 {% endblock %}
 
 {% block content %}
