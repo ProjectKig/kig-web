@@ -1,0 +1,29 @@
+syntax = "proto2";
+
+package kig.cai;
+
+import "common.proto";
+
+message CatchEvent {
+  required string leader = 1;
+  required string carrier = 2;
+}
+
+message EscapeEvent {
+  required string leader = 1;
+  oneof type {
+    string saver = 2;
+    float chance = 3;
+  }
+}
+
+message CaptureEvent {
+  required string leader = 1;
+  required string carrier = 2;
+}
+
+message DeathEvent {
+  required string player = 1;
+  required common.BukkitDamageCause cause = 2;
+  optional string killer = 3;
+}

@@ -16,7 +16,11 @@
 fn main() {
     protobuf_codegen_pure::Codegen::new()
         .out_dir("src/protos")
-        .inputs(&["protos/gamelog.proto"])
+        .inputs(&[
+            "protos/common.proto",
+            "protos/cai.proto",
+            "protos/gamelog.proto",
+        ])
         .include("protos")
         .run()
         .expect("protoc");

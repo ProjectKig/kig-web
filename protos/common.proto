@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package common;
+
+enum BukkitDamageCause {
+  ENTITY_ATTACK = 1;
+  PROJECTILE = 2;
+  VOID = 3;
+  SUFFOCATION = 4;
+  FIRE = 5;
+  FIRE_TICK = 6;
+  OTHER = 7;
+}

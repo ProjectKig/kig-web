@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block content %}
-{% let map = log.get_cai().get_map() %}
+{% let map = log.get_map() %}
 {% let duration = log.get_game_end() - log.get_game_start() %}
 <div class="row mb-2">
     <h1 class="text-center display-5"><strong>Cowboys and Indians</strong> Game <small>{{ game_id }}</small>
@@ -135,6 +135,7 @@
                             {% when ChatChannel::Team with (name, color) %}
                             <span class="badge rounded-pill bg-dark text-white"
                                 style="background-color: {{color}} !important;">{{ name }}</span>
+                            {% when ChatChannel::None %}
                             {% endmatch %}
                             <span
                                 style="color: {{chat.get_sender()|team_color(player_teams)}};"><strong>{{ chat.get_sender() }}</strong></span>:

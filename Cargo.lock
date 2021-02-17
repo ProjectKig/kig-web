@@ -1292,6 +1292,7 @@ dependencies = [
  "protobuf",
  "protobuf-codegen-pure",
  "regex",
+ "serde",
  "tokio 1.0.1",
 ]
 

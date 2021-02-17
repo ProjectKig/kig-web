@@ -15,8 +15,9 @@
 
 use crate::{
     error::Result,
+    protos::common::BukkitDamageCause,
     protos::gamelog::{
-        self, ChatEvent_ChatType, DeathEvent_DeathCause,
+        self, ChatEvent_ChatType,
         GameEvent_oneof_extension::{self, *},
         GameLog, TimeEvent,
     },
@@ -77,6 +78,7 @@ struct WrappedEvent<'a>(&'a TimeEvent);
 enum ChatChannel<'a> {
     Static(&'static str),
     Team(&'a str, &'static str),
+    None,
 }
 
 #[cached(
@@ -167,13 +169,13 @@ impl<'a> WrappedEvent<'a> {
 
     fn get_kill_description(&self) -> &'static str {
         match self.0.get_event().get_Death().get_cause() {
-            DeathEvent_DeathCause::ENTITY_ATTACK => "Melee",
-            DeathEvent_DeathCause::PROJECTILE => "Projectile",
-            DeathEvent_DeathCause::VOID => "Void",
-            DeathEvent_DeathCause::SUFFOCATION => "Drowning",
-            DeathEvent_DeathCause::FIRE => "Fire",
-            DeathEvent_DeathCause::FIRE_TICK => "Fire",
-            DeathEvent_DeathCause::OTHER => "Unknown cause",
+            BukkitDamageCause::ENTITY_ATTACK => "Melee",
+            BukkitDamageCause::PROJECTILE => "Projectile",
+            BukkitDamageCause::VOID => "Void",
+            BukkitDamageCause::SUFFOCATION => "Drowning",
+            BukkitDamageCause::FIRE => "Fire",
+            BukkitDamageCause::FIRE_TICK => "Fire",
+            BukkitDamageCause::OTHER => "Unknown cause",
         }
     }
 
@@ -190,6 +192,7 @@ impl<'a> WrappedEvent<'a> {
                 .unwrap_or_else(|| ChatChannel::Team(SPECTATORS.name, SPECTATORS.color)),
             ChatEvent_ChatType::SHOUT => ChatChannel::Static("Shout"),
             ChatEvent_ChatType::BROADCAST => ChatChannel::Static("Broadcast"),
+            ChatEvent_ChatType::GLOBAL => ChatChannel::None,
         }
     }
 

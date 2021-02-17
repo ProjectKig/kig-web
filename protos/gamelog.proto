@@ -1,9 +1,11 @@
 syntax = "proto2";
 
-package kigcore;
+package kig.core;
 
 option java_package = "dev.rocco.kig.core.mode.logging";
 option java_outer_classname = "GameLogProtocol";
+
+import "cai.proto";
 
 message Player {
   required bytes uuid = 1;
@@ -36,13 +38,20 @@ message GameLog {
   required int64 game_end = 4;
   required int32 start_players = 5;
   repeated TimeEvent events = 6;
+  required string map = 110; // For backwards compatibility with old CAI logs
 
   // extensions 100 to max;
   // Add extensions here instead
-  oneof extension { CaiExtension cai = 110; }
+  oneof extension {
+    CaiExtension cai = 112;
+    TimvExtension timv = 113;
+  }
 }
 
-message CaiExtension { required string map = 1; }
+message CaiExtension {
+  // required string map = 1; // Moved to GameLog
+}
+message TimvExtension {}
 
 // Events and extensions
 
@@ -53,10 +62,10 @@ message GameEvent {
     ChatEvent Chat = 100;
     JoinEvent Join = 101;
     LeaveEvent Leave = 102;
-    CatchEvent Catch = 110;
-    EscapeEvent Escape = 111;
-    CaptureEvent Capture = 112;
-    DeathEvent Death = 113;
+    kig.cai.CatchEvent Catch = 110;
+    kig.cai.EscapeEvent Escape = 111;
+    kig.cai.CaptureEvent Capture = 112;
+    kig.cai.DeathEvent Death = 113;
   }
 }
 
@@ -66,6 +75,7 @@ message ChatEvent {
     TEAM = 2;
     SHOUT = 3;
     BROADCAST = 4;
+    GLOBAL = 5;
   }
   required string sender = 1;
   required string message = 2;
@@ -79,36 +89,3 @@ message JoinEvent {
 }
 
 message LeaveEvent { required string player = 1; }
-
-message CatchEvent {
-  required string leader = 1;
-  required string carrier = 2;
-}
-
-message EscapeEvent {
-  required string leader = 1;
-  oneof type {
-    string saver = 2;
-    float chance = 3;
-  }
-}
-
-message CaptureEvent {
-  required string leader = 1;
-  required string carrier = 2;
-}
-
-message DeathEvent {
-  enum DeathCause {
-    ENTITY_ATTACK = 1;
-    PROJECTILE = 2;
-    VOID = 3;
-    SUFFOCATION = 4;
-    FIRE = 5;
-    FIRE_TICK = 6;
-    OTHER = 7;
-  }
-  required string player = 1;
-  required DeathCause cause = 2;
-  optional string killer = 3;
-}
