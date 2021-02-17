@@ -15,6 +15,7 @@
 
 use crate::{
     error::Result,
+    modes::GameMode,
     protos::common::BukkitDamageCause,
     protos::gamelog::{
         self, ChatEvent_ChatType,
@@ -27,6 +28,7 @@ use actix_web::{web, HttpResponse};
 use askama::Template;
 use cached::{proc_macro::cached, TimedCache};
 use regex::Regex;
+use std::str::FromStr;
 use std::{collections::HashMap, convert::TryInto, fmt};
 
 lazy_static::lazy_static! {
@@ -50,6 +52,7 @@ struct GamelogTemplate<'a> {
     events: Vec<WrappedEvent<'a>>,
     player_teams: HashMap<&'a str, &'a Team<'a>>,
     winner: Option<&'a Team<'a>>,
+    mode: GameMode,
 }
 
 /// Represents a Java UUID
@@ -82,26 +85,28 @@ enum ChatChannel<'a> {
 }
 
 #[cached(
-    type = "TimedCache<Vec<u8>, GameLog>",
+    type = "TimedCache<(Vec<u8>, GameMode), GameLog>",
     create = "{ TimedCache::with_lifespan(120) }",
-    convert = "{ id.clone() }",
+    convert = "{ (id.clone(), mode) }",
     result
 )]
-async fn get_log(state: web::Data<AppState>, id: Vec<u8>) -> Result<GameLog> {
+async fn get_log(state: web::Data<AppState>, mode: GameMode, id: Vec<u8>) -> Result<GameLog> {
     state
         .db
-        .game_log_by_id("cai", id.clone())
+        .game_log_by_id(mode.get_database_id(), id.clone())
         .await
         .and_then(|opt| opt.ok_or(crate::error::Error::NotFound))
 }
 
-pub async fn gamelog_id(
+pub async fn gamelog_by_id(
     state: web::Data<AppState>,
-    web::Path(path_id): web::Path<String>,
+    web::Path((mut mode, path_id)): web::Path<(String, String)>,
 ) -> Result<HttpResponse> {
     match base62::decode(&path_id) {
         Ok(id) => {
-            let log = get_log(state, id.to_be_bytes()[2..].to_vec()).await?;
+            mode.make_ascii_uppercase();
+            let mode = GameMode::from_str(&mode).map_err(|_| crate::error::Error::ModeNotFound)?;
+            let log = get_log(state, mode, id.to_be_bytes()[2..].to_vec()).await?;
             let teams: Vec<Team> = log
                 .get_teams()
                 .iter()
@@ -137,6 +142,7 @@ pub async fn gamelog_id(
                 events: log.get_events().iter().map(|e| WrappedEvent(e)).collect(),
                 player_teams,
                 winner,
+                mode,
             }
             .render()
             .unwrap();

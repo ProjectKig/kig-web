@@ -26,6 +26,7 @@ pub enum Error {
     Database(mongodb::error::Error),
     MongoDeserialize(ValueAccessError),
     Protobuf(ProtobufError),
+    ModeNotFound,
     NotFound,
 }
 
@@ -38,7 +39,7 @@ impl Display for Error {
 impl ResponseError for Error {
     fn status_code(&self) -> actix_web::http::StatusCode {
         match self {
-            Error::NotFound => StatusCode::NOT_FOUND,
+            Error::NotFound | Error::ModeNotFound => StatusCode::NOT_FOUND,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
@@ -47,6 +48,7 @@ impl ResponseError for Error {
         HttpResponse::new(self.status_code()).set_body(Body::from_slice(
             match self {
                 Error::NotFound => "Not found",
+                Error::ModeNotFound => "Mode not found",
                 _ => "Internal error. Please contact the server's administrators.",
             }
             .as_bytes(),

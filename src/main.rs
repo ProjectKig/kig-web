@@ -21,6 +21,7 @@ use std::sync::Arc;
 
 mod db;
 mod error;
+mod modes;
 mod protos;
 mod web;
 

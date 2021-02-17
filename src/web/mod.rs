@@ -19,7 +19,7 @@ use actix_web::{web, Scope};
 mod gamelog;
 
 pub fn add_routes() -> Scope {
-    web::scope("/").route("/game/{id}", web::get().to(gamelog::gamelog_id))
+    web::scope("/").route("/game/{mode}/{id}", web::get().to(gamelog::gamelog_by_id))
 }
 
 pub fn static_files() -> Files {
