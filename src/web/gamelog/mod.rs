@@ -31,6 +31,9 @@ use regex::Regex;
 use std::str::FromStr;
 use std::{collections::HashMap, convert::TryInto, fmt};
 
+mod cai;
+mod timv;
+
 lazy_static::lazy_static! {
     static ref MAP_ESCAPE_REGEX: Regex = Regex::new(r#"[^a-zA-Z0-9]"#).unwrap();
     static ref SPECTATORS: Team<'static> = Team {
@@ -53,6 +56,25 @@ struct GamelogTemplate<'a> {
     player_teams: HashMap<&'a str, &'a Team<'a>>,
     winner: Option<&'a Team<'a>>,
     mode: GameMode,
+    functions: Functions,
+}
+
+// Extensions - each mode can implement its own version
+struct Functions {
+    extension: Box<dyn GameLogExtension>,
+}
+
+pub trait GameLogExtension {
+    fn get_box_color(&self, event: &WrappedEvent<'_>) -> &'static str;
+}
+
+impl GameMode {
+    fn to_gamelog_ext(&self) -> Box<dyn GameLogExtension> {
+        match self {
+            GameMode::CAI => Box::new(cai::CaiExtension {}),
+            GameMode::TIMV => Box::new(timv::TimvExtension {}),
+        }
+    }
 }
 
 /// Represents a Java UUID
@@ -76,7 +98,7 @@ pub struct Team<'a> {
     pub color: &'static str,
 }
 
-struct WrappedEvent<'a>(&'a TimeEvent);
+pub struct WrappedEvent<'a>(&'a TimeEvent);
 
 enum ChatChannel<'a> {
     Static(&'static str),
@@ -130,6 +152,7 @@ pub async fn gamelog_by_id(
                 .iter()
                 .flat_map(|t| t.players.iter().map(move |p| (p.name, t)))
                 .collect();
+            let extension = mode.to_gamelog_ext();
             let render = GamelogTemplate {
                 log: &log,
                 total_players: if log.get_start_players() == 0 {
@@ -143,12 +166,26 @@ pub async fn gamelog_by_id(
                 player_teams,
                 winner,
                 mode,
+                functions: Functions {
+                    extension: extension,
+                },
             }
             .render()
             .unwrap();
             Ok(HttpResponse::Ok().body(render))
         }
         Err(_) => Ok(HttpResponse::BadRequest().body("Invalid game ID")),
+    }
+}
+
+impl Functions {
+    fn get_box_color(&self, event: &WrappedEvent<'_>) -> &str {
+        match event.get_raw_event() {
+            Chat(_) => "",
+            Join(_) => "list-group-item-info",
+            Leave(_) => "list-group-item-dark",
+            _ => self.extension.get_box_color(event),
+        }
     }
 }
 
@@ -159,18 +196,6 @@ impl<'a> WrappedEvent<'a> {
 
     fn get_raw_event(&self) -> &GameEvent_oneof_extension {
         self.0.get_event().extension.as_ref().unwrap()
-    }
-
-    fn get_box_color(&self) -> &'static str {
-        match self.get_raw_event() {
-            Chat(_) => "",
-            Join(_) => "list-group-item-info",
-            Leave(_) => "list-group-item-dark",
-            Catch(_) => "list-group-item-primary",
-            Escape(_) => "list-group-item-primary",
-            Capture(_) => "list-group-item-primary",
-            Death(_) => "list-group-item-secondary",
-        }
     }
 
     fn get_kill_description(&self) -> &'static str {

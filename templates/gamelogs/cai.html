@@ -1,0 +1,31 @@
+{% match match_evt %}
+{% when Catch with (catch) %}
+<i class="align-middle ri-eye-fill"></i>
+<strong style="color: {{catch.get_leader()|team_color(player_teams)}};">{{ catch.get_leader() }}</strong>
+was caught by
+<strong style="color: {{catch.get_carrier()|team_color(player_teams)}};">{{ catch.get_carrier() }}</strong>.
+{% when Escape with (escape) %}
+<i class="align-middle ri-{% if escape.has_saver() %}shield-star-fill{% else %}eye-off-fill{% endif %}"></i>
+<strong style="color: {{escape.get_leader()|team_color(player_teams)}};">{{ escape.get_leader() }}</strong>
+escaped.
+<span class="badge rounded-pill bg-primary">{% if escape.has_saver() %}Saved by
+    <strong>{{ escape.get_saver() }}</strong>{% else if escape.has_chance() %}Rolled
+    {{ "{:.1}"|format(escape.get_chance()) }}%{% endif %}</span>
+{% when Capture with (capture) %}
+<i class="align-middle ri-star-fill"></i>
+<strong style="color: {{capture.get_leader()|team_color(player_teams)}};">{{ capture.get_leader() }}</strong>
+was captured by
+<strong style="color: {{capture.get_carrier()|team_color(player_teams)}};">{{ capture.get_carrier() }}</strong>.
+{% when Death with (death) %}
+<i class="align-middle ri-close-line"></i>
+{% if death.has_killer() %}
+<strong style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
+was killed by
+<strong style="color: {{death.get_killer()|team_color(player_teams)}};">{{ death.get_killer() }}</strong>.
+{% else %}
+<strong style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
+died.
+{% endif %}
+<span class="badge rounded-pill bg-secondary">{{ time_evt.get_kill_description() }}</span>
+{% else %}
+{% endmatch %}

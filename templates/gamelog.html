@@ -125,75 +125,44 @@
                 <ul class="list-group" id="events">
                     {% for time_evt in events %}
                     <li class="list-group-item {% if time_evt.is_chat() %}log-chat-entry{% else %}log-entry{% endif %}
-                         d-flex justify-content-between align-items-center {{ time_evt.get_box_color() }}">
+                         d-flex justify-content-between align-items-center {{ functions.get_box_color(time_evt) }}">
                         <span>
                             {% match time_evt.get_raw_event() %}
                             {% when Chat with (chat) %}
                             {% let channel = time_evt.get_chat_channel(chat.get_sender(), player_teams) %}
                             {% match channel %}
                             {% when ChatChannel::Static with (name) %}
-                            <span class="badge rounded-pill bg-dark text-white">{{ name }}</span>
+                                <span class="badge rounded-pill bg-dark text-white">{{ name }}</span>
                             {% when ChatChannel::Team with (name, color) %}
-                            <span class="badge rounded-pill bg-dark text-white"
-                                style="background-color: {{color}} !important;">{{ name }}</span>
+                                <span class="badge rounded-pill bg-dark text-white"
+                                    style="background-color: {{color}} !important;">{{ name }}</span>
                             {% when ChatChannel::None %}
                             {% endmatch %}
-                            <span
-                                style="color: {{chat.get_sender()|team_color(player_teams)}};"><strong>{{ chat.get_sender() }}</strong></span>:
+                                <span
+                                    style="color: {{chat.get_sender()|team_color(player_teams)}};"><strong>{{ chat.get_sender() }}</strong></span>:
                             {{ chat.get_message() }}
                             {% let count = chat.get_count() %}
                             {% if count > 1 %}
-                            <span class="badge rounded-pill bg-warning text-dark">x{{ count }}</span>
+                                <span class="badge rounded-pill bg-warning text-dark">x{{ count }}</span>
                             {% endif %}
                             {% when Join with (join) %}
                             {% let jt = join.get_team() %}
                             {% let team = jt|team_from_idx(teams) %}
-                            <i class="align-middle ri-user-add-fill"></i>
-                            <strong>{{ join.get_player() }}</strong> joined the <strong
-                                style="color: {{team.color}};">{{ team.name }}</strong>
+                                <i class="align-middle ri-user-add-fill"></i>
+                                <strong>{{ join.get_player() }}</strong> joined the <strong
+                                    style="color: {{team.color}};">{{ team.name }}</strong>
                             team.
                             {% when Leave with (leave) %}
-                            <i class="align-middle ri-user-unfollow-fill"></i>
-                            <strong
-                                style="color: {{leave.get_player()|team_color(player_teams)}};">{{ leave.get_player() }}</strong>
-                            left.
-                            {% when Catch with (catch) %}
-                            <i class="align-middle ri-eye-fill"></i>
-                            <strong
-                                style="color: {{catch.get_leader()|team_color(player_teams)}};">{{ catch.get_leader() }}</strong>
-                            was caught by
-                            <strong
-                                style="color: {{catch.get_carrier()|team_color(player_teams)}};">{{ catch.get_carrier() }}</strong>.
-                            {% when Escape with (escape) %}
-                            <i
-                                class="align-middle ri-{% if escape.has_saver() %}shield-star-fill{% else %}eye-off-fill{% endif %}"></i>
-                            <strong
-                                style="color: {{escape.get_leader()|team_color(player_teams)}};">{{ escape.get_leader() }}</strong>
-                            escaped.
-                            <span class="badge rounded-pill bg-primary">{% if escape.has_saver() %}Saved by
-                                <strong>{{ escape.get_saver() }}</strong>{% else if escape.has_chance() %}Rolled
-                                {{ "{:.1}"|format(escape.get_chance()) }}%{% endif %}</span>
-                            {% when Capture with (capture) %}
-                            <i class="align-middle ri-star-fill"></i>
-                            <strong
-                                style="color: {{capture.get_leader()|team_color(player_teams)}};">{{ capture.get_leader() }}</strong>
-                            was captured by
-                            <strong
-                                style="color: {{capture.get_carrier()|team_color(player_teams)}};">{{ capture.get_carrier() }}</strong>.
-                            {% when Death with (death) %}
-                            <i class="align-middle ri-close-line"></i>
-                            {% if death.has_killer() %}
-                            <strong
-                                style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
-                            was killed by
-                            <strong
-                                style="color: {{death.get_killer()|team_color(player_teams)}};">{{ death.get_killer() }}</strong>.
+                                <i class="align-middle ri-user-unfollow-fill"></i>
+                                <strong style="color: {{leave.get_player()|team_color(player_teams)}};">{{ leave.get_player() }}</strong> left.
                             {% else %}
-                            <strong
-                                style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
-                            died.
-                            {% endif %}
-                            <span class="badge rounded-pill bg-secondary">{{ time_evt.get_kill_description() }}</span>
+                            {% let match_evt = time_evt.get_raw_event() %}
+                            {% match mode %}
+                            {% when CAI %}
+                            {% include "gamelogs/cai.html" %}
+                            {% when TIMV %}
+                            {% include "gamelogs/timv.html" %}
+                            {% endmatch %}
                             {% endmatch %}
                         </span>
                         <span class="badge text-dark">{{ time_evt.get_time()|format_duration_i32 }}</span>
