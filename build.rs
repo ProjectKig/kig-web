@@ -17,9 +17,9 @@ fn main() {
     protobuf_codegen_pure::Codegen::new()
         .out_dir("src/protos")
         .inputs(&[
-            "protos/common.proto",
             "protos/cai.proto",
             "protos/gamelog.proto",
+            "protos/timv.proto",
         ])
         .include("protos")
         .run()

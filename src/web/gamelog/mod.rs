@@ -16,22 +16,20 @@
 use crate::{
     error::Result,
     modes::GameMode,
-    protos::common::BukkitDamageCause,
-    protos::gamelog::{
-        self, ChatEvent_ChatType,
-        GameEvent_oneof_extension::{self, *},
-        GameLog, TimeEvent,
-    },
+    protos::gamelog::{self, ChatEvent_ChatType, GameLog, TimeEvent},
     AppState,
 };
 use actix_web::{web, HttpResponse};
 use askama::Template;
 use cached::{proc_macro::cached, TimedCache};
+use event::EventType::{self, *};
+use gamelog::{BukkitDamageCause, GameEvent};
 use regex::Regex;
 use std::str::FromStr;
 use std::{collections::HashMap, convert::TryInto, fmt};
 
 mod cai;
+mod event;
 mod timv;
 
 lazy_static::lazy_static! {
@@ -52,7 +50,7 @@ struct GamelogTemplate<'a> {
     total_players: usize,
     game_id: &'a str,
     teams: Vec<Team<'a>>,
-    events: Vec<WrappedEvent<'a>>,
+    events: Vec<WrappedEvent>,
     player_teams: HashMap<&'a str, &'a Team<'a>>,
     winner: Option<&'a Team<'a>>,
     mode: GameMode,
@@ -65,7 +63,8 @@ struct Functions {
 }
 
 pub trait GameLogExtension {
-    fn get_box_color(&self, event: &WrappedEvent<'_>) -> &'static str;
+    fn parse_event<'a>(&self, event: &'a GameEvent) -> event::EventType;
+    fn get_box_color(&self, event: &EventType) -> &'static str;
 }
 
 impl GameMode {
@@ -98,7 +97,10 @@ pub struct Team<'a> {
     pub color: &'static str,
 }
 
-pub struct WrappedEvent<'a>(&'a TimeEvent);
+pub struct WrappedEvent {
+    event: EventType,
+    time: i32,
+}
 
 enum ChatChannel<'a> {
     Static(&'static str),
@@ -162,7 +164,11 @@ pub async fn gamelog_by_id(
                 },
                 game_id: &path_id,
                 teams: teams.clone(),
-                events: log.get_events().iter().map(|e| WrappedEvent(e)).collect(),
+                events: log
+                    .get_events()
+                    .iter()
+                    .map(|e| WrappedEvent::parse(e, &*extension))
+                    .collect(),
                 player_teams,
                 winner,
                 mode,
@@ -179,27 +185,17 @@ pub async fn gamelog_by_id(
 }
 
 impl Functions {
-    fn get_box_color(&self, event: &WrappedEvent<'_>) -> &str {
+    fn get_box_color(&self, event: &WrappedEvent) -> &str {
         match event.get_raw_event() {
-            Chat(_) => "",
-            Join(_) => "list-group-item-info",
-            Leave(_) => "list-group-item-dark",
-            _ => self.extension.get_box_color(event),
+            EventType::Chat(_) => "",
+            EventType::Join(_) => "list-group-item-info",
+            EventType::Leave(_) => "list-group-item-dark",
+            _ => self.extension.get_box_color(&event.event),
         }
     }
-}
 
-impl<'a> WrappedEvent<'a> {
-    fn get_time(&self) -> i32 {
-        self.0.get_time()
-    }
-
-    fn get_raw_event(&self) -> &GameEvent_oneof_extension {
-        self.0.get_event().extension.as_ref().unwrap()
-    }
-
-    fn get_kill_description(&self) -> &'static str {
-        match self.0.get_event().get_Death().get_cause() {
+    fn get_damage_desc(&self, damage: &BukkitDamageCause) -> &'static str {
+        match damage {
             BukkitDamageCause::ENTITY_ATTACK => "Melee",
             BukkitDamageCause::PROJECTILE => "Projectile",
             BukkitDamageCause::VOID => "Void",
@@ -209,26 +205,71 @@ impl<'a> WrappedEvent<'a> {
             BukkitDamageCause::OTHER => "Unknown cause",
         }
     }
+}
 
-    fn get_chat_channel(
+impl WrappedEvent {
+    fn parse(event: &TimeEvent, extension: &dyn GameLogExtension) -> Self {
+        let time = event.get_time();
+        WrappedEvent {
+            time,
+            event: Self::parse_event(event, extension),
+        }
+    }
+
+    /// Attempts to parse the event, interpreting it as a default event if possible.
+    fn parse_event(event: &TimeEvent, extension: &dyn GameLogExtension) -> EventType {
+        let event = event.get_event();
+        match extension.parse_event(event) {
+            EventType::Unknown => {
+                use crate::protos::gamelog::exts::*;
+                if let Some(event) = chat.get(event) {
+                    EventType::Chat(event)
+                } else if let Some(event) = join.get(event) {
+                    EventType::Join(event)
+                } else if let Some(event) = leave.get(event) {
+                    EventType::Leave(event)
+                } else {
+                    EventType::Unknown
+                }
+            }
+            event => event,
+        }
+    }
+
+    fn get_time(&self) -> i32 {
+        self.time
+    }
+
+    fn get_raw_event(&self) -> &EventType {
+        &self.event
+    }
+
+    fn get_chat_channel<'a>(
         &self,
         player: &str,
-        player_teams: &'a HashMap<&str, &Team<'a>>,
+        player_teams: &HashMap<&str, &Team<'a>>,
     ) -> ChatChannel<'a> {
-        match self.0.get_event().get_Chat().get_field_type() {
-            ChatEvent_ChatType::LOBBY => ChatChannel::Static("Lobby"),
-            ChatEvent_ChatType::TEAM => player_teams
-                .get(player)
-                .map(|&x| ChatChannel::Team(x.name, x.color))
-                .unwrap_or_else(|| ChatChannel::Team(SPECTATORS.name, SPECTATORS.color)),
-            ChatEvent_ChatType::SHOUT => ChatChannel::Static("Shout"),
-            ChatEvent_ChatType::BROADCAST => ChatChannel::Static("Broadcast"),
-            ChatEvent_ChatType::GLOBAL => ChatChannel::None,
+        if let EventType::Chat(chat_event) = &self.event {
+            match chat_event.get_field_type() {
+                ChatEvent_ChatType::LOBBY => ChatChannel::Static("Lobby"),
+                ChatEvent_ChatType::TEAM => player_teams
+                    .get(player)
+                    .map(|&x| ChatChannel::Team(x.name, x.color))
+                    .unwrap_or_else(|| ChatChannel::Team(SPECTATORS.name, SPECTATORS.color)),
+                ChatEvent_ChatType::SHOUT => ChatChannel::Static("Shout"),
+                ChatEvent_ChatType::BROADCAST => ChatChannel::Static("Broadcast"),
+                ChatEvent_ChatType::GLOBAL => ChatChannel::None,
+            }
+        } else {
+            ChatChannel::None
         }
     }
 
     fn is_chat(&self) -> bool {
-        self.0.get_event().has_Chat()
+        match self.event {
+            EventType::Chat(_) => true,
+            _ => false,
+        }
     }
 }
 

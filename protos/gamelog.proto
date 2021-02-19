@@ -1,11 +1,19 @@
 syntax = "proto2";
 
-package kig.core;
+package kigcore;
 
 option java_package = "dev.rocco.kig.core.mode.logging";
 option java_outer_classname = "GameLogProtocol";
 
-import "cai.proto";
+enum BukkitDamageCause {
+  ENTITY_ATTACK = 1;
+  PROJECTILE = 2;
+  VOID = 3;
+  SUFFOCATION = 4;
+  FIRE = 5;
+  FIRE_TICK = 6;
+  OTHER = 7;
+}
 
 message Player {
   required bytes uuid = 1;
@@ -31,42 +39,12 @@ message TimeEvent {
   required ModeState state = 3;
 }
 
-message GameLog {
-  repeated Team teams = 1;
-  optional string winner = 2;
-  required int64 game_start = 3;
-  required int64 game_end = 4;
-  required int32 start_players = 5;
-  repeated TimeEvent events = 6;
-  required string map = 110; // For backwards compatibility with old CAI logs
+message GameEvent { extensions 100 to max; }
 
-  // extensions 100 to max;
-  // Add extensions here instead
-  oneof extension {
-    CaiExtension cai = 112;
-    TimvExtension timv = 113;
-  }
-}
-
-message CaiExtension {
-  // required string map = 1; // Moved to GameLog
-}
-message TimvExtension {}
-
-// Events and extensions
-
-message GameEvent {
-  // extensions 100 to max;
-  // Add extensions here instead
-  oneof extension {
-    ChatEvent Chat = 100;
-    JoinEvent Join = 101;
-    LeaveEvent Leave = 102;
-    kig.cai.CatchEvent Catch = 110;
-    kig.cai.EscapeEvent Escape = 111;
-    kig.cai.CaptureEvent Capture = 112;
-    kig.cai.DeathEvent Death = 113;
-  }
+extend GameEvent {
+  optional ChatEvent chat = 100;
+  optional JoinEvent join = 101;
+  optional LeaveEvent leave = 102;
 }
 
 message ChatEvent {
@@ -75,7 +53,7 @@ message ChatEvent {
     TEAM = 2;
     SHOUT = 3;
     BROADCAST = 4;
-    GLOBAL = 5;
+    GLOBAL = 5; // Used for modes that only have 1 chat, e.g. TIMV
   }
   required string sender = 1;
   required string message = 2;
@@ -89,3 +67,16 @@ message JoinEvent {
 }
 
 message LeaveEvent { required string player = 1; }
+
+message GameLog {
+  repeated Team teams = 1;
+  optional string winner = 2;
+  required int64 game_start = 3;
+  required int64 game_end = 4;
+  required int32 start_players = 5;
+  repeated TimeEvent events = 6;
+  // Keep backwards-compatibility with old CAI logs that had the map as an
+  // extension with ID 110
+  optional string map = 110;
+  extensions 112 to max;
+}

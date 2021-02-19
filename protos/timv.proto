@@ -1,0 +1,47 @@
+syntax = "proto2";
+
+package kigtimv;
+
+option java_package = "rip.hive.timv.logging";
+option java_outer_classname = "GameLogProtocol";
+
+import "gamelog.proto";
+
+message LogExtension {
+  extend kigcore.GameLog { optional LogExtension extension = 113; }
+}
+
+extend kigcore.GameEvent {
+  optional DeathEvent death = 110;
+  optional TestEvent test = 111;
+  optional BodyEvent body = 112;
+  optional TrapEvent trap = 113;
+}
+
+message DeathEvent {
+  required string player = 1;
+  enum DeathCause {
+    BUKKIT = 1;
+    CLAYMORE = 2;
+    SUICIDE_BOMB = 3;
+    TRAITOR_TRAP = 4;
+    CREEPER = 5;
+    WOLF = 6;
+    TESTER_BOMB = 7;
+  }
+  required DeathCause cause = 2;
+  optional string killer = 3;
+  required kigcore.BukkitDamageCause last_damage_cause = 4;
+}
+
+message TestEvent {
+  required string player = 1;
+  required bool spoofed = 2;
+}
+
+message BodyEvent {
+  required string player = 1;
+  required string identifier = 2;
+}
+
+message TrapEvent { required string player = 1; }

@@ -1,8 +1,22 @@
 syntax = "proto2";
 
-package kig.cai;
+package kigcai;
 
-import "common.proto";
+option java_package = "dev.rocco.kig.cai.logging";
+option java_outer_classname = "GameLogProtocol";
+
+import "gamelog.proto";
+
+extend kigcore.GameEvent {
+  optional CatchEvent catch = 110;
+  optional EscapeEvent escape = 111;
+  optional CaptureEvent capture = 112;
+  optional DeathEvent death = 113;
+}
+
+message LogExtension {
+  extend kigcore.GameLog { optional LogExtension extension = 112; }
+}
 
 message CatchEvent {
   required string leader = 1;
@@ -24,6 +38,6 @@ message CaptureEvent {
 
 message DeathEvent {
   required string player = 1;
-  required common.BukkitDamageCause cause = 2;
+  required kigcore.BukkitDamageCause cause = 2;
   optional string killer = 3;
 }
