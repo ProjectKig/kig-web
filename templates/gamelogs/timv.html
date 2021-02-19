@@ -1,0 +1,29 @@
+{% match match_evt %}
+{% when TimvTest with (test) %}
+<i class="align-middle ri-eye-fill"></i>
+<strong style="color: {{test.get_player()|team_color(player_teams)}};">{{ test.get_player() }}</strong>
+tested.
+{% if test.get_spoofed() %}
+<span class="badge rounded-pill bg-primary">Spoofed</span>
+{% endif %}
+{% when TimvTrap with (trap) %}
+<strong style="color: {{trap.get_player()|team_color(player_teams)}};">{{ trap.get_player() }}</strong> activated a
+traitor trap.
+{% when TimvBody with (body) %}
+<i class="ri-search-eye-fill"></i>
+<strong style="color: {{body.get_player()|team_color(player_teams)}};">{{ body.get_player() }}</strong>'s body was found
+by
+<strong style="color: {{body.get_identifier()|team_color(player_teams)}};">{{ body.get_identifier() }}</strong>.
+{% when TimvDeath with (death) %}
+<i class="align-middle ri-close-line"></i>
+{% if death.has_killer() %}
+<strong style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
+was killed by
+<strong style="color: {{death.get_killer()|team_color(player_teams)}};">{{ death.get_killer() }}</strong>.
+{% else %}
+<strong style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
+died.
+{% endif %}
+<span class="badge rounded-pill bg-secondary">{{ death.get_damage_desc() }}</span>
+{% else %}
+{% endmatch %}

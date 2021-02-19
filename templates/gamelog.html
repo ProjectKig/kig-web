@@ -158,10 +158,10 @@
                             {% else %}
                             {% let match_evt = time_evt.get_raw_event() %}
                             {% match mode %}
-                            {% when CAI %}
-                            {% include "gamelogs/cai.html" %}
-                            {% when TIMV %}
-                            {% include "gamelogs/timv.html" %}
+                                {% when GameMode::CAI %}
+                                    {% include "gamelogs/cai.html" %}
+                                {% when GameMode::TIMV %}
+                                    {% include "gamelogs/timv.html" %}
                             {% endmatch %}
                             {% endmatch %}
                         </span>

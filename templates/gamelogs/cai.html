@@ -26,6 +26,6 @@ was killed by
 <strong style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
 died.
 {% endif %}
-<span class="badge rounded-pill bg-secondary">{{ functions.get_damage_desc(death.get_cause()) }}</span>
+<span class="badge rounded-pill bg-secondary">{{ death.get_cause().get_damage_desc() }}</span>
 {% else %}
 {% endmatch %}

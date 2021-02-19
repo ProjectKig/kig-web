@@ -58,7 +58,7 @@ struct GamelogTemplate<'a> {
 }
 
 // Extensions - each mode can implement its own version
-struct Functions {
+pub struct Functions {
     extension: Box<dyn GameLogExtension>,
 }
 
@@ -172,9 +172,7 @@ pub async fn gamelog_by_id(
                 player_teams,
                 winner,
                 mode,
-                functions: Functions {
-                    extension: extension,
-                },
+                functions: Functions { extension },
             }
             .render()
             .unwrap();
@@ -191,18 +189,6 @@ impl Functions {
             EventType::Join(_) => "list-group-item-info",
             EventType::Leave(_) => "list-group-item-dark",
             _ => self.extension.get_box_color(&event.event),
-        }
-    }
-
-    fn get_damage_desc(&self, damage: &BukkitDamageCause) -> &'static str {
-        match damage {
-            BukkitDamageCause::ENTITY_ATTACK => "Melee",
-            BukkitDamageCause::PROJECTILE => "Projectile",
-            BukkitDamageCause::VOID => "Void",
-            BukkitDamageCause::SUFFOCATION => "Drowning",
-            BukkitDamageCause::FIRE => "Fire",
-            BukkitDamageCause::FIRE_TICK => "Fire",
-            BukkitDamageCause::OTHER => "Unknown cause",
         }
     }
 }
@@ -269,6 +255,20 @@ impl WrappedEvent {
         match self.event {
             EventType::Chat(_) => true,
             _ => false,
+        }
+    }
+}
+
+impl BukkitDamageCause {
+    fn get_damage_desc(&self) -> &'static str {
+        match self {
+            BukkitDamageCause::ENTITY_ATTACK => "Melee",
+            BukkitDamageCause::PROJECTILE => "Projectile",
+            BukkitDamageCause::VOID => "Void",
+            BukkitDamageCause::SUFFOCATION => "Drowning",
+            BukkitDamageCause::FIRE => "Fire",
+            BukkitDamageCause::FIRE_TICK => "Fire",
+            BukkitDamageCause::OTHER => "Unknown cause",
         }
     }
 }

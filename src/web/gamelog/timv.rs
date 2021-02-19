@@ -1,3 +1,5 @@
+use crate::protos::timv::{DeathEvent, DeathEvent_DeathCause};
+
 use super::{event::EventType, GameLogExtension};
 
 #[derive(Clone, Copy)]
@@ -6,10 +8,10 @@ pub struct TimvExtension {}
 impl GameLogExtension for TimvExtension {
     fn get_box_color(&self, event: &super::EventType) -> &'static str {
         match event {
-            EventType::CaiCatch(_) => "list-group-item-primary",
-            EventType::CaiEscape(_) => "list-group-item-primary",
-            EventType::CaiCapture(_) => "list-group-item-primary",
-            EventType::CaiDeath(_) => "list-group-item-secondary",
+            EventType::TimvTest(_) => "list-group-item-primary",
+            EventType::TimvTrap(_) => "list-group-item-danger",
+            EventType::TimvBody(_) => "list-group-item-warning",
+            EventType::TimvDeath(_) => "list-group-item-secondary",
             _ => "",
         }
     }
@@ -26,6 +28,20 @@ impl GameLogExtension for TimvExtension {
             EventType::TimvTrap(event)
         } else {
             EventType::Unknown
+        }
+    }
+}
+
+impl DeathEvent {
+    pub fn get_damage_desc(&self) -> &'static str {
+        match self.get_cause() {
+            DeathEvent_DeathCause::BUKKIT => self.get_last_damage_cause().get_damage_desc(),
+            DeathEvent_DeathCause::CLAYMORE => "Claymore",
+            DeathEvent_DeathCause::SUICIDE_BOMB => "Suicide Bomb",
+            DeathEvent_DeathCause::TRAITOR_TRAP => "Trap",
+            DeathEvent_DeathCause::CREEPER => "Creepers",
+            DeathEvent_DeathCause::WOLF => "Wolf",
+            DeathEvent_DeathCause::TESTER_BOMB => "Tester Bomb",
         }
     }
 }
