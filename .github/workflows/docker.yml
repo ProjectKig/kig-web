@@ -2,7 +2,7 @@ name: Publish Docker
 on:
   push:
     branches:
-      - master
+      - main
 jobs:
   push:
     name: Push image to registry
