@@ -73,8 +73,10 @@
                         data-bs-target="#accord-data-{{ team.name }}" aria-expanded="true"
                         aria-controls="accord-data-{{ team.name }}">
                         <span style="color: {{team.color}}"><strong>{{ team.name }}</strong>
-                            ({{ team.players.len() }})</span> <span
+                            ({{ team.players.len() }})</span> 
+                            {% if functions.extension.supports_score() %}<span
                             class="badge rounded-pill float-end bg-{% if !log.has_winner() %}warning{% else if log.get_winner() == team.name %}success{% else %}danger{% endif %}">{{ team.score }}</span>
+                            {% endif %}
                     </button>
                 </h2>
                 <div id="accord-data-{{ team.name }}" class="accordion-collapse collapse show"

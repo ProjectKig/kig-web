@@ -30,6 +30,10 @@ impl GameLogExtension for TimvExtension {
             EventType::Unknown
         }
     }
+
+    fn supports_score(&self) -> bool {
+        false
+    }
 }
 
 impl DeathEvent {

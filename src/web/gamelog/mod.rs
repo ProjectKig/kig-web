@@ -63,8 +63,11 @@ pub struct Functions {
 }
 
 pub trait GameLogExtension {
-    fn parse_event<'a>(&self, event: &'a GameEvent) -> event::EventType;
+    fn parse_event(&self, event: &GameEvent) -> event::EventType;
     fn get_box_color(&self, event: &EventType) -> &'static str;
+    fn supports_score(&self) -> bool {
+        true
+    }
 }
 
 impl GameMode {
@@ -252,10 +255,7 @@ impl WrappedEvent {
     }
 
     fn is_chat(&self) -> bool {
-        match self.event {
-            EventType::Chat(_) => true,
-            _ => false,
-        }
+        matches!(self.event, EventType::Chat(_))
     }
 }
 

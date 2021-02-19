@@ -1,0 +1,20 @@
+name: Publish Docker
+on:
+  push:
+    branches:
+      - master
+jobs:
+  push:
+    name: Push image to registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Push to registry
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: projectkig/kig-web/kig-web
+          tag_with_ref: true
