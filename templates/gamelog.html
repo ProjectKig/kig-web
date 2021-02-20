@@ -3,6 +3,7 @@
 
 {% block head %}
 <link href="/static/css/gamelog.css" rel="stylesheet">
+<meta name="description" content="Read the overview of this game of {{ mode.get_full_name() }} on {{ map }}. Or play by connecting to playkig.com.">
 <meta property="og:title" content="{{ mode.get_full_name() }}: Game {{ game_id }}">
 <meta property="og:url" content="https://playkig.com/game/{{ mode.get_database_id() }}/{{ game_id }}">
 <meta property="og:image"
@@ -11,6 +12,8 @@
     content="Read the overview of this game of {{ mode.get_full_name() }} on {{ map }}. Or play by connecting to playkig.com.">
 <meta property="og:site_name" content="KIG Network">
 <meta name="twitter:card" content="summary">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#f7b32a">
 {% endblock %}
 
 {% block content %}
