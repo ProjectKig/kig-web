@@ -30,4 +30,6 @@ WORKDIR ${exec}
 
 VOLUME ["/web/img", "/web/static"]
 
+COPY static /web/static
+
 CMD ["./kig-web"]
