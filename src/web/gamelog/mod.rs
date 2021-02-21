@@ -244,7 +244,7 @@ impl WrappedEvent {
                 ChatEvent_ChatType::TEAM => if event.has_team() {
                     log.teams.get(event.get_team() as usize)
                 } else {
-                    log.player_teams.get(event.get_sender()).map(|&t| t)
+                    log.player_teams.get(event.get_sender()).copied()
                 }
                 .map(|t| ChatChannel::Team(t.name, t.color))
                 .unwrap_or_else(|| ChatChannel::Team(SPECTATORS.name, SPECTATORS.color)),
