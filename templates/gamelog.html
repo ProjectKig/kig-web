@@ -134,7 +134,7 @@
                         <span>
                             {% match time_evt.get_raw_event() %}
                             {% when Chat with (chat) %}
-                            {% let channel = time_evt.get_chat_channel(chat.get_sender(), player_teams) %}
+                            {% let channel = time_evt.get_chat_channel(chat, self) %}
                             {% match channel %}
                             {% when ChatChannel::Static with (name) %}
                                 <span class="badge rounded-pill bg-dark text-white">{{ name }}</span>

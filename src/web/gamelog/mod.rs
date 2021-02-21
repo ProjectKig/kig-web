@@ -23,7 +23,7 @@ use actix_web::{web, HttpResponse};
 use askama::Template;
 use cached::{proc_macro::cached, TimedCache};
 use event::EventType::{self, *};
-use gamelog::{BukkitDamageCause, GameEvent};
+use gamelog::{BukkitDamageCause, ChatEvent, GameEvent};
 use regex::Regex;
 use std::str::FromStr;
 use std::{collections::HashMap, convert::TryInto, fmt};
@@ -235,16 +235,19 @@ impl WrappedEvent {
 
     fn get_chat_channel<'a>(
         &self,
-        player: &str,
-        player_teams: &HashMap<&str, &Team<'a>>,
+        event: &ChatEvent,
+        log: &GamelogTemplate<'a>,
     ) -> ChatChannel<'a> {
         if let EventType::Chat(chat_event) = &self.event {
             match chat_event.get_field_type() {
                 ChatEvent_ChatType::LOBBY => ChatChannel::Static("Lobby"),
-                ChatEvent_ChatType::TEAM => player_teams
-                    .get(player)
-                    .map(|&x| ChatChannel::Team(x.name, x.color))
-                    .unwrap_or_else(|| ChatChannel::Team(SPECTATORS.name, SPECTATORS.color)),
+                ChatEvent_ChatType::TEAM => if event.has_team() {
+                    log.teams.get(event.get_team() as usize)
+                } else {
+                    log.player_teams.get(event.get_sender()).map(|&t| t)
+                }
+                .map(|t| ChatChannel::Team(t.name, t.color))
+                .unwrap_or_else(|| ChatChannel::Team(SPECTATORS.name, SPECTATORS.color)),
                 ChatEvent_ChatType::SHOUT => ChatChannel::Static("Shout"),
                 ChatEvent_ChatType::BROADCAST => ChatChannel::Static("Broadcast"),
                 ChatEvent_ChatType::GLOBAL => ChatChannel::None,
