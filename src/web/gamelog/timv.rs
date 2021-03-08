@@ -46,6 +46,7 @@ impl DeathEvent {
             DeathEvent_DeathCause::CREEPER => "Creepers",
             DeathEvent_DeathCause::WOLF => "Wolf",
             DeathEvent_DeathCause::TESTER_BOMB => "Tester Bomb",
+            DeathEvent_DeathCause::CAT => "Cat",
         }
     }
 }
