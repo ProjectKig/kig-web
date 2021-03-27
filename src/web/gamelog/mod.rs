@@ -19,7 +19,10 @@ use crate::{
     protos::gamelog::{self, ChatEvent_ChatType, GameLog, TimeEvent},
     AppState,
 };
-use actix_web::{web, HttpResponse};
+use actix_web::{
+    http::header::{ContentType, IntoHeaderValue},
+    web, HttpResponse,
+};
 use askama::Template;
 use cached::{proc_macro::cached, TimedCache};
 use event::EventType::{self, *};
@@ -179,7 +182,9 @@ pub async fn gamelog_by_id(
             }
             .render()
             .unwrap();
-            Ok(HttpResponse::Ok().body(render))
+            Ok(HttpResponse::Ok()
+                .content_type(IntoHeaderValue::try_into(ContentType::html()).unwrap())
+                .body(render))
         }
         Err(_) => Ok(HttpResponse::BadRequest().body("Invalid game ID")),
     }
@@ -280,8 +285,8 @@ impl From<&[u8]> for UUID {
     fn from(bytes: &[u8]) -> Self {
         assert_eq!(bytes.len(), 16);
         UUID {
-            msb: u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
-            lsb: u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+            msb: u64::from_be_bytes(TryInto::try_into(&bytes[0..8]).unwrap()),
+            lsb: u64::from_be_bytes(TryInto::try_into(&bytes[8..16]).unwrap()),
         }
     }
 }
