@@ -1,0 +1,42 @@
+syntax = "proto2";
+
+package kigbp;
+
+option java_package = "com.playkig.bp.logging";
+option java_outer_classname = "GameLogProtocol";
+
+import "gamelog.proto";
+
+extend kigcore.GameEvent {
+  optional DeathEvent death = 110;
+  optional RoundEvent round = 111;
+  optional PowerUpEvent powerup = 112;
+  optional WinnersEvent winners = 113;
+}
+
+message LogExtension {
+  extend kigcore.GameLog { optional LogExtension extension = 114; }
+}
+
+message DeathEvent {
+  message PlayerDeathEvent {
+    enum DeathCause {
+      VOID = 1;
+      DETECTION = 2;
+      UNKNOWN = 3;
+    }
+    required string name = 1;
+    required int32 timestamp = 2;
+    required DeathCause death_cause = 3;
+  }
+  repeated PlayerDeathEvent player = 1;
+}
+
+message RoundEvent { required string floor = 1; }
+
+message PowerUpEvent {
+  required string powerUp = 1;
+  required string name = 2;
+}
+
+message WinnersEvent { repeated string winner = 1; }

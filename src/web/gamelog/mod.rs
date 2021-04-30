@@ -31,6 +31,7 @@ use regex::Regex;
 use std::str::FromStr;
 use std::{collections::HashMap, convert::TryInto, fmt};
 
+mod bp;
 mod cai;
 mod event;
 mod timv;
@@ -55,7 +56,7 @@ struct GamelogTemplate<'a> {
     teams: Vec<Team<'a>>,
     events: Vec<WrappedEvent>,
     player_teams: HashMap<&'a str, &'a Team<'a>>,
-    winner: Option<&'a Team<'a>>,
+    winner: Option<Team<'a>>,
     mode: GameMode,
     functions: Functions,
 }
@@ -78,6 +79,7 @@ impl GameMode {
         match self {
             GameMode::CAI => Box::new(cai::CaiExtension {}),
             GameMode::TIMV => Box::new(timv::TimvExtension {}),
+            GameMode::BP => Box::new(bp::BpExtension {}),
         }
     }
 }
@@ -155,7 +157,23 @@ pub async fn gamelog_by_id(
                         .collect(),
                 })
                 .collect();
-            let winner = teams.iter().find(|t| t.name == log.get_winner());
+            let winner = log
+                .has_winner()
+                .then(|| log.get_winner())
+                .and_then(|winner| {
+                    teams
+                        .iter()
+                        .find(|t| t.name == winner)
+                        .cloned()
+                        .or_else(|| {
+                            Some(Team {
+                                name: winner,
+                                color: "",
+                                score: 0,
+                                players: vec![],
+                            })
+                        })
+                });
             let player_teams = teams
                 .iter()
                 .flat_map(|t| t.players.iter().map(move |p| (p.name, t)))
@@ -361,6 +379,9 @@ mod filters {
     }
 
     pub fn map_file_name(map_name: &str) -> askama::Result<String> {
+        if map_name.is_empty() {
+            return Ok(String::from("default"));
+        }
         let mut res: String = super::MAP_ESCAPE_REGEX.replace_all(map_name, "").into();
         res.make_ascii_lowercase();
         Ok(res)

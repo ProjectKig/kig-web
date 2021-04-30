@@ -1,0 +1,23 @@
+{% match match_evt %}
+{% when BpRound with (round) %}
+<i class="align-middle ri-play-circle-fill"></i>
+Round started on <strong>{{ round.get_floor() }}</strong>.
+{% when BpPowerup with (powerup) %}
+<i class="align-middle ri-star-fill"></i>
+<strong>{{ powerup.get_name() }}</strong> collected the <strong>{{ powerup.get_powerUp() }}</strong> powerup.
+{% when BpWinners with (winners) %}
+<i class="align-middle ri-medal-fill"></i>
+Winners: <strong>{{ winners.get_winner()|join(", ") }}</strong>
+{% when BpDeath with (death) %}
+{% let players = death.get_player() %}
+<i class="align-middle ri-close-line"></i>
+{% for eliminated in players -%}
+<strong data-bs-toggle="tooltip" data-bs-placement="top" title="{{ eliminated.get_damage_desc() }}">{{-
+    eliminated.get_name() -}}</strong>{% if !loop.last -%},&nbsp;{%- endif %}
+{%- endfor %}
+
+{% if death.get_player().len() == 1 %} was {% else %} were {% endif %}
+eliminated.
+{% else %}
+
+{% endmatch %}

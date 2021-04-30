@@ -1,5 +1,5 @@
 use crate::protos::gamelog as log;
-use crate::protos::{cai, timv};
+use crate::protos::{bp, cai, timv};
 
 pub enum EventType {
     Unknown,
@@ -20,4 +20,10 @@ pub enum EventType {
     TimvTest(timv::TestEvent),
     TimvBody(timv::BodyEvent),
     TimvTrap(timv::TrapEvent),
+
+    // BP events
+    BpDeath(bp::DeathEvent),
+    BpRound(bp::RoundEvent),
+    BpWinners(bp::WinnersEvent),
+    BpPowerup(bp::PowerUpEvent),
 }

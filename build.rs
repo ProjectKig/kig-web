@@ -20,6 +20,7 @@ fn main() {
             "protos/cai.proto",
             "protos/gamelog.proto",
             "protos/timv.proto",
+            "protos/bp.proto",
         ])
         .include("protos")
         .run()

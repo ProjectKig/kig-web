@@ -42,11 +42,15 @@
     <div class="col-8 border rounded d-flex flex-column justify-content-center">
         <div class="row">
             <div class="col">
-                <h2 class="display-6 text-center"><strong>Winner:</strong> {% if log.has_winner() %}
-                    {% let team = winner.unwrap() %}
-                    <strong style="color: {{ team.color }}">{{ team.name }}</strong> {% else %}
+                <h2 class="display-6 text-center"><strong>Winner:</strong>
+                {% let winner = winner.as_ref() %}
+                {% if winner.is_some() %}
+                {% let team = winner.unwrap() %}
+                    <strong style="color: {{ team.color }}">{{ team.name }}</strong>
+                {% else %}
                     Tie
-                    {% endif %}</h2>
+                {% endif %}
+                </h2>
             </div>
         </div>
         <div class="row mt-2">
@@ -167,6 +171,8 @@
                                     {% include "gamelogs/cai.html" %}
                                 {% when GameMode::TIMV %}
                                     {% include "gamelogs/timv.html" %}
+                                {% when GameMode::BP %}
+                                    {% include "gamelogs/bp.html" %}
                             {% endmatch %}
                             {% endmatch %}
                         </span>

@@ -2,6 +2,7 @@
 pub enum GameMode {
     CAI,
     TIMV,
+    BP,
 }
 
 impl GameMode {
@@ -9,6 +10,7 @@ impl GameMode {
         match self {
             GameMode::CAI => "Cowboys and Indians",
             GameMode::TIMV => "Trouble in Mineville",
+            GameMode::BP => "BlockParty",
         }
     }
 
@@ -16,6 +18,7 @@ impl GameMode {
         match self {
             GameMode::CAI => "cai",
             GameMode::TIMV => "timv",
+            GameMode::BP => "bp",
         }
     }
 }
