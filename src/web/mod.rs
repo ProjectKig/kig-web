@@ -26,6 +26,14 @@ pub fn static_files() -> Files {
     Files::new("/static", "static").show_files_listing()
 }
 
+pub fn static_files_fallback() -> Files {
+    Files::new("/game-static", "static").show_files_listing()
+}
+
 pub fn images() -> Files {
     Files::new("/img", "img")
+}
+
+pub fn images_fallback() -> Files {
+    Files::new("/game-img", "img")
 }

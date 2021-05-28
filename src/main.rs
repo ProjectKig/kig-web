@@ -43,7 +43,9 @@ async fn main() -> io::Result<()> {
         App::new()
             .data(state.clone())
             .service(web::static_files())
+            .service(web::static_files_fallback())
             .service(web::images())
+            .service(web::images_fallback())
             .service(web::add_routes())
     })
     .bind(format!("{}:{}", host, port))?

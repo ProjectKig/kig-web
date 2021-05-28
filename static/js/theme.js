@@ -10,7 +10,7 @@ function toggleDarkTheme() {
 
 function setDarkTheme(dark) {
     darkTheme = dark
-    stylesheet.setAttribute("href", dark ? "/static/css/bootstrap-dark.min.css" : "")
+    stylesheet.setAttribute("href", dark ? "/game-static/css/bootstrap-dark.min.css" : "")
     document.body.setAttribute("data-theme", dark ? "dark" : "") // For other CSS files
     localStorage.setItem("kig-theme", JSON.stringify({ dark }))
     toggler.innerHTML = `Theme: ${dark ? "Dark" : "Light"}`
