@@ -1,0 +1,30 @@
+// Copyright (C) 2021  KIG Team
+syntax = "proto2";
+
+package kig.grav;
+
+option java_package = "com.playkig.grav.logging";
+option java_outer_classname = "GameLogProtocol";
+
+import "gamelog.proto";
+
+extend kigcore.GameEvent {
+  optional StageCompletionEvent stage_completion = 110;
+  optional GameFinishEvent game_finish = 111;
+}
+
+extend kigcore.GameLog { optional LogExtension log_ext = 115; }
+
+message LogExtension { repeated string stages = 1; }
+
+message StageCompletionEvent {
+  required string player = 1;
+  required uint32 stage_index = 2;
+  required uint64 time = 3;
+}
+
+message GameFinishEvent {
+  required string player = 1;
+  required uint32 place = 2;
+  required uint64 time = 3;
+}

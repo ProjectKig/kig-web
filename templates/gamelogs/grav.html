@@ -1,0 +1,13 @@
+{% match match_evt %}
+{% when GravStageCompletion with (stage_completion) %}
+<i class="align-middle ri-play-circle-fill"></i>
+<strong>{{ stage_completion.get_player() }}</strong> finished <strong data-bs-toggle="tooltip" data-bs-placement="top"
+    title="{{ stage_completion.get_stage_index()|grav_stage_name(extension) }}">Stage {{
+    stage_completion.get_stage_index() + 1
+    }}</strong> in <strong>{{ stage_completion.get_time()|grav_format_time}}</strong>.
+{% when GravGameFinish with (game_finish) %}
+<i class="align-middle ri-star-fill"></i>
+<strong>{{ game_finish.get_player() }}</strong> finished <strong>#{{ game_finish.get_place() }}</strong> in <strong>{{
+    game_finish.get_time()|grav_format_time}}</strong>.
+{% else %}
+{% endmatch %}

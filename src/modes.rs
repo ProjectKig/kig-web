@@ -3,6 +3,7 @@ pub enum GameMode {
     CAI,
     TIMV,
     BP,
+    GRAV,
 }
 
 impl GameMode {
@@ -11,6 +12,7 @@ impl GameMode {
             GameMode::CAI => "Cowboys and Indians",
             GameMode::TIMV => "Trouble in Mineville",
             GameMode::BP => "BlockParty",
+            GameMode::GRAV => "Gravity",
         }
     }
 
@@ -19,6 +21,7 @@ impl GameMode {
             GameMode::CAI => "cai",
             GameMode::TIMV => "timv",
             GameMode::BP => "bp",
+            GameMode::GRAV => "grav",
         }
     }
 }

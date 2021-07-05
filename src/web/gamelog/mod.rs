@@ -28,12 +28,13 @@ use cached::{proc_macro::cached, TimedCache};
 use event::EventType::{self, *};
 use gamelog::{BukkitDamageCause, ChatEvent, GameEvent};
 use regex::Regex;
-use std::str::FromStr;
+use std::{borrow::Cow, str::FromStr};
 use std::{collections::HashMap, convert::TryInto, fmt};
 
 mod bp;
 mod cai;
 mod event;
+mod grav;
 mod timv;
 
 lazy_static::lazy_static! {
@@ -59,6 +60,7 @@ struct GamelogTemplate<'a> {
     winner: Option<Team<'a>>,
     mode: GameMode,
     functions: Functions,
+    extension: WrappedExtension,
 }
 
 // Extensions - each mode can implement its own version
@@ -72,14 +74,39 @@ pub trait GameLogExtension {
     fn supports_score(&self) -> bool {
         true
     }
+    fn get_map<'slf, 'log: 'slf>(&'slf self, log: &'log GameLog) -> Cow<str> {
+        Cow::Borrowed(log.get_map())
+    }
+}
+
+#[derive(Clone)]
+pub enum WrappedExtension {
+    Cai(cai::CaiExtension),
+    Timv(timv::TimvExtension),
+    Bp(bp::BpExtension),
+    Grav(grav::GravExtension),
+}
+
+impl WrappedExtension {
+    fn boxed(self) -> Box<dyn GameLogExtension> {
+        use self::WrappedExtension::*;
+        match self {
+            Cai(ext) => Box::new(ext),
+            Timv(ext) => Box::new(ext),
+            Bp(ext) => Box::new(ext),
+            Grav(ext) => Box::new(ext),
+        }
+    }
 }
 
 impl GameMode {
-    fn to_gamelog_ext(&self) -> Box<dyn GameLogExtension> {
+    fn to_gamelog_ext(&self, log: &GameLog) -> WrappedExtension {
+        use self::WrappedExtension::*;
         match self {
-            GameMode::CAI => Box::new(cai::CaiExtension {}),
-            GameMode::TIMV => Box::new(timv::TimvExtension {}),
-            GameMode::BP => Box::new(bp::BpExtension {}),
+            GameMode::CAI => Cai(cai::CaiExtension {}),
+            GameMode::TIMV => Timv(timv::TimvExtension {}),
+            GameMode::BP => Bp(bp::BpExtension {}),
+            GameMode::GRAV => Grav(grav::GravExtension::new(log)),
         }
     }
 }
@@ -178,7 +205,8 @@ pub async fn gamelog_by_id(
                 .iter()
                 .flat_map(|t| t.players.iter().map(move |p| (p.name, t)))
                 .collect();
-            let extension = mode.to_gamelog_ext();
+            let extension = mode.to_gamelog_ext(&log);
+            let extension_ptr = extension.clone().boxed();
             let render = GamelogTemplate {
                 log: &log,
                 total_players: if log.get_start_players() == 0 {
@@ -191,12 +219,15 @@ pub async fn gamelog_by_id(
                 events: log
                     .get_events()
                     .iter()
-                    .map(|e| WrappedEvent::parse(e, &*extension))
+                    .map(|e| WrappedEvent::parse(e, &*extension_ptr))
                     .collect(),
                 player_teams,
                 winner,
                 mode,
-                functions: Functions { extension },
+                functions: Functions {
+                    extension: extension_ptr,
+                },
+                extension,
             }
             .render()
             .unwrap();
@@ -216,6 +247,10 @@ impl Functions {
             EventType::Leave(_) => "list-group-item-dark",
             _ => self.extension.get_box_color(&event.event),
         }
+    }
+
+    fn get_map<'slf, 'log: 'slf>(&'slf self, log: &'log GameLog) -> Cow<str> {
+        self.extension.get_map(log)
     }
 }
 
@@ -366,6 +401,7 @@ fn format_duration(millis: i32) -> String {
 }
 
 mod filters {
+    pub use super::grav::filters::*;
     use std::{borrow::Cow, collections::HashMap};
 
     use super::Team;

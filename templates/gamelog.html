@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block content %}
-{% let map = log.get_map() %}
+{% let map = functions.get_map(log) %}
 {% let duration = log.get_game_end() - log.get_game_start() %}
 <div class="row mb-2">
     <h1 class="text-center display-5"><strong>{{ mode.get_full_name() }} </strong> Game <small>{{ game_id }}</small>
@@ -173,6 +173,8 @@
                                     {% include "gamelogs/timv.html" %}
                                 {% when GameMode::BP %}
                                     {% include "gamelogs/bp.html" %}
+                                {% when GameMode::GRAV %}
+                                    {% include "gamelogs/grav.html" %}
                             {% endmatch %}
                             {% endmatch %}
                         </span>

@@ -1,5 +1,5 @@
 use crate::protos::gamelog as log;
-use crate::protos::{bp, cai, timv};
+use crate::protos::{bp, cai, grav, timv};
 
 pub enum EventType {
     Unknown,
@@ -26,4 +26,8 @@ pub enum EventType {
     BpRound(bp::RoundEvent),
     BpWinners(bp::WinnersEvent),
     BpPowerup(bp::PowerUpEvent),
+
+    // GRAV events
+    GravStageCompletion(grav::StageCompletionEvent),
+    GravGameFinish(grav::GameFinishEvent),
 }

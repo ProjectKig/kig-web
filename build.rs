@@ -21,6 +21,7 @@ fn main() {
             "protos/gamelog.proto",
             "protos/timv.proto",
             "protos/bp.proto",
+            "protos/grav.proto",
         ])
         .include("protos")
         .run()
