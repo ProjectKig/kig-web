@@ -20,6 +20,7 @@ pub enum EventType {
     TimvTest(timv::TestEvent),
     TimvBody(timv::BodyEvent),
     TimvTrap(timv::TrapEvent),
+    TimvDetectiveBody(timv::DetectiveBodyEvent),
 
     // BP events
     BpDeath(bp::DeathEvent),

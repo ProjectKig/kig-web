@@ -12,6 +12,7 @@ impl GameLogExtension for TimvExtension {
             EventType::TimvTrap(_) => "list-group-item-danger",
             EventType::TimvBody(_) => "list-group-item-warning",
             EventType::TimvDeath(_) => "list-group-item-secondary",
+            EventType::TimvDetectiveBody(_) => "list-group-item-primary",
             _ => "",
         }
     }
@@ -26,6 +27,8 @@ impl GameLogExtension for TimvExtension {
             EventType::TimvBody(event)
         } else if let Some(event) = trap.get(event) {
             EventType::TimvTrap(event)
+        } else if let Some(event) = detective.get(event) {
+            EventType::TimvDetectiveBody(event)
         } else {
             EventType::Unknown
         }

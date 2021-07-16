@@ -25,5 +25,17 @@ was killed by
 died.
 {% endif %}
 <span class="badge rounded-pill bg-secondary">{{ death.get_damage_desc() }}</span>
+{% if death.has_assassin_target() && death.get_assassin_target() %}
+<span class="badge rounded-pill bg-primary">Target</span>
+{% endif %}
+{% when TimvDetectiveBody with (detective) %}
+<i class="ri-search-eye-fill"></i>
+<strong style="color: {{detective.get_player()|team_color(player_teams)}};">{{ detective.get_player() }}</strong>'s body
+was
+inspected
+by
+<strong style="color: {{detective.get_identifier()|team_color(player_teams)}};">{{ detective.get_identifier()
+    }}</strong>.
+{% when TimvDeath with (death) %}
 {% else %}
 {% endmatch %}

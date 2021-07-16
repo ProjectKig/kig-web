@@ -16,6 +16,7 @@ extend kigcore.GameEvent {
   optional TestEvent test = 111;
   optional BodyEvent body = 112;
   optional TrapEvent trap = 113;
+  optional DetectiveBodyEvent detective = 114;
 }
 
 message DeathEvent {
@@ -33,6 +34,7 @@ message DeathEvent {
   required DeathCause cause = 2;
   optional string killer = 3;
   required kigcore.BukkitDamageCause last_damage_cause = 4;
+  optional bool assassin_target = 5;
 }
 
 message TestEvent {
@@ -46,3 +48,8 @@ message BodyEvent {
 }
 
 message TrapEvent { required string player = 1; }
+
+message DetectiveBodyEvent {
+  required string player = 1;
+  required string identifier = 2;
+}
