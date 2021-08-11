@@ -13,6 +13,8 @@ enum BukkitDamageCause {
   FIRE = 5;
   FIRE_TICK = 6;
   OTHER = 7;
+  FALL = 8;
+  DROWNING = 9;
 }
 
 message Player {

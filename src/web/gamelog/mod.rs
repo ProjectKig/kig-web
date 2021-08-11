@@ -326,9 +326,11 @@ impl BukkitDamageCause {
             BukkitDamageCause::ENTITY_ATTACK => "Melee",
             BukkitDamageCause::PROJECTILE => "Projectile",
             BukkitDamageCause::VOID => "Void",
-            BukkitDamageCause::SUFFOCATION => "Drowning",
+            BukkitDamageCause::SUFFOCATION => "Suffocation",
             BukkitDamageCause::FIRE => "Fire",
             BukkitDamageCause::FIRE_TICK => "Fire",
+            BukkitDamageCause::FALL => "Fall",
+            BukkitDamageCause::DROWNING => "Drowning",
             BukkitDamageCause::OTHER => "Unknown cause",
         }
     }
