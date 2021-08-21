@@ -122,6 +122,7 @@ pub struct UUID {
 pub struct Player<'a> {
     pub uuid: UUID,
     pub name: &'a str,
+    pub nick: Option<&'a str>,
 }
 
 #[derive(Clone)]
@@ -180,6 +181,7 @@ pub async fn gamelog_by_id(
                         .map(|p| Player {
                             name: p.get_name(),
                             uuid: p.get_uuid().into(),
+                            nick: p.has_nick().then(|| p.get_nick()),
                         })
                         .collect(),
                 })

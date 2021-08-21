@@ -99,7 +99,11 @@
                                             height="32">
                                     </div>
                                     <div class="col">
-                                        <span class="align-middle">{{ player.name }}</span>
+                                        <span class="align-middle">{{ player.name }}
+                                        {% if player.nick.is_some() %}
+                                        <small>({{ player.nick.unwrap() }})</small>
+                                        {% endif %}
+                                        </span>
                                     </div>
                                 </div>
                             </li>
