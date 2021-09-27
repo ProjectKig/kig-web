@@ -31,4 +31,5 @@ pub enum EventType {
     // GRAV events
     GravStageCompletion(grav::StageCompletionEvent),
     GravGameFinish(grav::GameFinishEvent),
+    GravHardcoreFail(grav::HardcoreModeFailEvent),
 }

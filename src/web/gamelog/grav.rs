@@ -26,6 +26,7 @@ impl GameLogExtension for GravExtension {
         match event {
             EventType::GravGameFinish(_) => "list-group-item-success",
             EventType::GravStageCompletion(_) => "list-group-item-primary",
+            EventType::GravHardcoreFail(_) => "list-group-item-danger",
             _ => "",
         }
     }
@@ -36,6 +37,8 @@ impl GameLogExtension for GravExtension {
             EventType::GravGameFinish(event)
         } else if let Some(event) = stage_completion.get(event) {
             EventType::GravStageCompletion(event)
+        } else if let Some(event) = hardcore_fail.get(event) {
+            EventType::GravHardcoreFail(event)
         } else {
             EventType::Unknown
         }

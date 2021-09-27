@@ -11,6 +11,7 @@ import "gamelog.proto";
 extend kigcore.GameEvent {
   optional StageCompletionEvent stage_completion = 110;
   optional GameFinishEvent game_finish = 111;
+  optional HardcoreModeFailEvent hardcore_fail = 112;
 }
 
 extend kigcore.GameLog { optional LogExtension log_ext = 115; }
@@ -21,10 +22,18 @@ message StageCompletionEvent {
   required string player = 1;
   required uint32 stage_index = 2;
   required uint64 time = 3;
+  required bool skipped = 6;
 }
 
 message GameFinishEvent {
   required string player = 1;
   required uint32 place = 2;
   required uint64 time = 3;
+}
+
+message HardcoreModeFailEvent {
+  required string player = 1;
+  required uint32 stage = 2;
+  required uint64 time = 3;
+  required bool final = 4;
 }

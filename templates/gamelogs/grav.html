@@ -5,9 +5,22 @@
     title="{{ stage_completion.get_stage_index()|grav_stage_name(extension) }}">Stage {{
     stage_completion.get_stage_index() + 1
     }}</strong> in <strong>{{ stage_completion.get_time()|grav_format_time}}</strong>.
+{% if stage_completion.get_skipped() %}
+<span class="badge rounded-pill bg-primary">Skipped</span>
+{% endif %}
 {% when GravGameFinish with (game_finish) %}
 <i class="align-middle ri-star-fill"></i>
 <strong>{{ game_finish.get_player() }}</strong> finished <strong>#{{ game_finish.get_place() }}</strong> in <strong>{{
     game_finish.get_time()|grav_format_time}}</strong>.
+{% when GravHardcoreFail with (hardcore_fail) %}
+<i class="align-middle ri-close-line"></i>
+<strong>{{ hardcore_fail.get_player() }}</strong> died in <strong>Hardcore Mode</strong> on <strong
+    data-bs-toggle="tooltip" data-bs-placement="top"
+    title="{{ hardcore_fail.get_stage()|grav_stage_name(extension) }}">Stage {{
+    hardcore_fail.get_stage() + 1
+    }}</strong>.
+{% if hardcore_fail.get_field_final() %}
+<span class="badge rounded-pill bg-danger">Eliminated</span>
+{% endif %}
 {% else %}
 {% endmatch %}
