@@ -1,0 +1,22 @@
+{% match match_evt %}
+{% when HerdDeath with (death) %}
+<i class="align-middle ri-close-line"></i>
+{% if death.has_killer() %}
+<strong style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
+was killed by
+<strong style="color: {{death.get_killer()|team_color(player_teams)}};">{{ death.get_killer() }}</strong>.
+{% else %}
+<strong style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
+died.
+{% endif %}
+<span class="badge rounded-pill bg-secondary">{{ death.get_damage_desc() }}</span>
+{% if !death.get_respawn() && extension.is_respawn() %}
+<span class="badge rounded-pill bg-danger">Final</span>
+{% endif %}
+{% when HerdElimination with (elimination) %}
+<i class="align-middle ri-close-circle-fill"></i>
+{% let t = elimination.get_team() %}
+{% let team = t|team_from_idx(teams) %}
+Team <strong style="color: {{team.color}};">{{ team.name }}</strong> was eliminated.
+{% else %}
+{% endmatch %}

@@ -1,0 +1,14 @@
+// Copyright (C) 2022 KIG Team
+syntax = "proto2";
+
+package kig.bed;
+
+import "herd.proto";
+import "gamelog.proto";
+
+extend kigcore.GameEvent { optional BedDestructionEvent bed_destroy = 111; }
+
+message BedDestructionEvent {
+  required int32 team = 1;
+  optional string player = 2;
+}

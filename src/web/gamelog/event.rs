@@ -1,5 +1,5 @@
 use crate::protos::gamelog as log;
-use crate::protos::{bp, cai, grav, timv};
+use crate::protos::{bp, cai, grav, timv, herd, bed};
 
 pub enum EventType {
     Unknown,
@@ -32,4 +32,11 @@ pub enum EventType {
     GravStageCompletion(grav::StageCompletionEvent),
     GravGameFinish(grav::GameFinishEvent),
     GravHardcoreFail(grav::HardcoreModeFailEvent),
+
+    // Herd events
+    HerdDeath(herd::DeathEvent),
+    HerdElimination(herd::EliminationEvent),
+
+    // BED events
+    BedBedDestruction(bed::BedDestructionEvent),
 }

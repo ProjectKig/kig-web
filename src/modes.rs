@@ -4,6 +4,7 @@ pub enum GameMode {
     TIMV,
     BP,
     GRAV,
+    BED,
 }
 
 impl GameMode {
@@ -13,6 +14,7 @@ impl GameMode {
             GameMode::TIMV => "Trouble in Mineville",
             GameMode::BP => "BlockParty",
             GameMode::GRAV => "Gravity",
+            GameMode::BED => "Bed Wars"
         }
     }
 
@@ -22,6 +24,7 @@ impl GameMode {
             GameMode::TIMV => "timv",
             GameMode::BP => "bp",
             GameMode::GRAV => "grav",
+            GameMode::BED => "bed"
         }
     }
 }

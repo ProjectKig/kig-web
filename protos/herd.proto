@@ -1,0 +1,32 @@
+// Copyright (C) 2022  KIG Team
+syntax = "proto2";
+
+package kig.herd;
+
+import "gamelog.proto";
+
+extend kigcore.GameEvent {
+  optional DeathEvent death = 210;
+  optional EliminationEvent elimination = 211;
+}
+
+extend kigcore.GameLog { optional LogExtension log_ext = 200; }
+
+message LogExtension { required bool respawn = 1; }
+
+message DeathEvent {
+  required string player = 1;
+  enum DeathCause {
+    NATURAL = 1;
+    PLAYER = 2;
+    OWNED_ENTITY = 3;
+    DISCONNECT = 4;
+  }
+  required DeathCause cause = 2;
+  required bool respawn = 3;
+  optional DeathCause player_cause = 4;
+  optional string killer = 5;
+  optional kigcore.BukkitDamageCause last_damage_cause = 6;
+}
+
+message EliminationEvent { required int32 team = 1; }

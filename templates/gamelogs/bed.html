@@ -1,0 +1,12 @@
+{% match match_evt %}
+{% when BedBedDestruction with (bed_destroy) %}
+<i class="align-middle ri-hotel-bed-fill"></i>
+{% let t = bed_destroy.get_team() %}
+{% let team = t|team_from_idx(teams) %}
+Team <strong style="color: {{team.color}};">{{ team.name }}</strong>'s bed was destroyed
+{%- if bed_destroy.has_player() %}
+by <strong style="color: {{bed_destroy.get_player()|team_color(player_teams)}};">{{ bed_destroy.get_player()
+    }}</strong>
+{%- endif -%}.
+{% else %}
+{% endmatch %}

@@ -22,6 +22,8 @@ fn main() {
             "protos/timv.proto",
             "protos/bp.proto",
             "protos/grav.proto",
+            "protos/herd.proto",
+            "protos/bed.proto"
         ])
         .include("protos")
         .run()

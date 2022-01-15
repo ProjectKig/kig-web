@@ -36,6 +36,7 @@ mod cai;
 mod event;
 mod grav;
 mod timv;
+mod bed;
 
 lazy_static::lazy_static! {
     static ref MAP_ESCAPE_REGEX: Regex = Regex::new(r#"[^a-zA-Z0-9]"#).unwrap();
@@ -85,6 +86,7 @@ pub enum WrappedExtension {
     Timv(timv::TimvExtension),
     Bp(bp::BpExtension),
     Grav(grav::GravExtension),
+    Bed(bed::BedExtension)
 }
 
 impl WrappedExtension {
@@ -95,6 +97,7 @@ impl WrappedExtension {
             Timv(ext) => Box::new(ext),
             Bp(ext) => Box::new(ext),
             Grav(ext) => Box::new(ext),
+            Bed(ext) => Box::new(ext)
         }
     }
 }
@@ -107,6 +110,7 @@ impl GameMode {
             GameMode::TIMV => Timv(timv::TimvExtension {}),
             GameMode::BP => Bp(bp::BpExtension {}),
             GameMode::GRAV => Grav(grav::GravExtension::new(log)),
+            GameMode::BED => Bed(bed::BedExtension::new(log))
         }
     }
 }
