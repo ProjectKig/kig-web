@@ -64,6 +64,7 @@ impl DeathEvent {
         match self.get_cause() {
             DeathEvent_DeathCause::OWNED_ENTITY => "Companion",
             DeathEvent_DeathCause::DISCONNECT => "Disconnected",
+            DeathEvent_DeathCause::OUT_OF_MAP => "Out of Map",
             _ => self.get_last_damage_cause().get_damage_desc(),
         }
     }

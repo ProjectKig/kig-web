@@ -21,6 +21,7 @@ message DeathEvent {
     PLAYER = 2;
     OWNED_ENTITY = 3;
     DISCONNECT = 4;
+    OUT_OF_MAP = 5;
   }
   required DeathCause cause = 2;
   required bool respawn = 3;
