@@ -1,4 +1,4 @@
-use actix_web::{App, HttpServer};
+use actix_web::{middleware, App, HttpServer};
 use db::DbHandle;
 
 // Copyright (C) 2021 RoccoDev
@@ -41,6 +41,7 @@ async fn main() -> io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(middleware::Compress::default())
             .data(state.clone())
             .service(web::static_files())
             .service(web::static_files_fallback())
