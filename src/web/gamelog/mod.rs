@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
+    db::GameLogMeta,
     error::Result,
     modes::GameMode,
     protos::gamelog::{self, ChatEvent_ChatType, GameLog, TimeEvent},
@@ -31,12 +32,12 @@ use regex::Regex;
 use std::{borrow::Cow, str::FromStr};
 use std::{collections::HashMap, convert::TryInto, fmt};
 
+mod bed;
 mod bp;
 mod cai;
 mod event;
 mod grav;
 mod timv;
-mod bed;
 
 lazy_static::lazy_static! {
     static ref MAP_ESCAPE_REGEX: Regex = Regex::new(r#"[^a-zA-Z0-9]"#).unwrap();
@@ -62,6 +63,7 @@ struct GamelogTemplate<'a> {
     mode: GameMode,
     functions: Functions,
     extension: WrappedExtension,
+    server: Option<String>,
 }
 
 // Extensions - each mode can implement its own version
@@ -86,7 +88,7 @@ pub enum WrappedExtension {
     Timv(timv::TimvExtension),
     Bp(bp::BpExtension),
     Grav(grav::GravExtension),
-    Bed(bed::BedExtension)
+    Bed(bed::BedExtension),
 }
 
 impl WrappedExtension {
@@ -97,7 +99,7 @@ impl WrappedExtension {
             Timv(ext) => Box::new(ext),
             Bp(ext) => Box::new(ext),
             Grav(ext) => Box::new(ext),
-            Bed(ext) => Box::new(ext)
+            Bed(ext) => Box::new(ext),
         }
     }
 }
@@ -110,7 +112,7 @@ impl GameMode {
             GameMode::TIMV => Timv(timv::TimvExtension {}),
             GameMode::BP => Bp(bp::BpExtension {}),
             GameMode::GRAV => Grav(grav::GravExtension::new(log)),
-            GameMode::BED => Bed(bed::BedExtension::new(log))
+            GameMode::BED => Bed(bed::BedExtension::new(log)),
         }
     }
 }
@@ -149,12 +151,16 @@ enum ChatChannel<'a> {
 }
 
 #[cached(
-    type = "TimedCache<(Vec<u8>, GameMode), GameLog>",
+    type = "TimedCache<(Vec<u8>, GameMode), (GameLog, GameLogMeta)>",
     create = "{ TimedCache::with_lifespan(120) }",
     convert = "{ (id.clone(), mode) }",
     result
 )]
-async fn get_log(state: web::Data<AppState>, mode: GameMode, id: Vec<u8>) -> Result<GameLog> {
+async fn get_log(
+    state: web::Data<AppState>,
+    mode: GameMode,
+    id: Vec<u8>,
+) -> Result<(GameLog, GameLogMeta)> {
     state
         .db
         .game_log_by_id(mode.get_database_id(), id.clone())
@@ -170,7 +176,7 @@ pub async fn gamelog_by_id(
         Ok(id) => {
             mode.make_ascii_uppercase();
             let mode = GameMode::from_str(&mode).map_err(|_| crate::error::Error::ModeNotFound)?;
-            let log = get_log(state, mode, id.to_be_bytes()[2..].to_vec()).await?;
+            let (log, meta) = get_log(state, mode, id.to_be_bytes()[2..].to_vec()).await?;
             let teams: Vec<Team> = log
                 .get_teams()
                 .iter()
@@ -234,6 +240,7 @@ pub async fn gamelog_by_id(
                     extension: extension_ptr,
                 },
                 extension,
+                server: meta.server,
             }
             .render()
             .unwrap();

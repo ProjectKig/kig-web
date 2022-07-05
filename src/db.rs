@@ -26,6 +26,11 @@ pub struct DbHandle {
     client: Database,
 }
 
+#[derive(Clone)]
+pub struct GameLogMeta {
+    pub server: Option<String>,
+}
+
 impl DbHandle {
     pub async fn new() -> Result<DbHandle> {
         let uri = std::env::var("KIG_MONGO_URI")
@@ -39,14 +44,25 @@ impl DbHandle {
 
 /// Retrieving the data from the db
 impl DbHandle {
-    pub async fn game_log_by_id(&self, game: &str, id: Vec<u8>) -> Result<Option<GameLog>> {
-        let filter = Some(doc! {"game_id": DbHandle::bytes(id)});
-        let res: Option<Result<GameLog>> = self
+    pub async fn game_log_by_id(
+        &self,
+        game: &str,
+        id: Vec<u8>,
+    ) -> Result<Option<(GameLog, GameLogMeta)>> {
+        let filter = Some(doc! {"game_id": Self::bytes(id)});
+        let res: Option<Result<(GameLog, GameLogMeta)>> = self
             .client
             .collection(&format!("gamelogs_{}", game))
             .find_one(filter, None)
             .await?
-            .map(|doc| Ok(GameLog::parse_from_bytes(&doc.get_binary_generic("data")?).unwrap()));
+            .map(|doc| {
+                Ok((
+                    GameLog::parse_from_bytes(&doc.get_binary_generic("data")?).unwrap(),
+                    GameLogMeta {
+                        server: doc.get_str("server").map(Into::into).ok(),
+                    },
+                ))
+            });
         res.transpose()
     }
 

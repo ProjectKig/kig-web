@@ -55,6 +55,9 @@
         </div>
         <div class="row mt-2">
             <div class="col text-center">
+                <span class="text-outline gray"><i class="align-middle ri-server-fill"></i>
+                    <span class="align-middle">{{ server.as_deref().unwrap_or("Unknown") }}</span>
+                </span>&nbsp;
                 <span class="text-outline gold"><i class="align-middle ri-parent-fill"></i>
                     <span class="align-middle">{{ total_players }}</span>
                 </span>&nbsp;

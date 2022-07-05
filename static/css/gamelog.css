@@ -1,9 +1,9 @@
 body {
-    background-color: rgb(254.0, 254.0, 254.0);
+	background-color: rgb(254.0, 254.0, 254.0);
 }
 
 .team-info {
-    display: block;
+	display: block;
 }
 
 .text-outline {
@@ -93,11 +93,21 @@ body {
 }
 
 .gray {
+	color: #686565;
+	border-color: #686565
+}
+
+[data-theme=dark] .gray {
 	color: #b2adad;
 	border-color: #b2adad
 }
 
 .darkgray {
+	color: #4e4c4c;
+	border-color: #4e4c4c
+}
+
+[data-theme=dark] .darkgray {
 	color: #686565;
 	border-color: #686565
 }
