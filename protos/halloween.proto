@@ -1,0 +1,21 @@
+syntax = "proto2";
+
+package kig.halloween;
+
+import "gamelog.proto";
+
+message LogExtension {
+  extend kigcore.GameLog {
+    optional LogExtension extension = 116;
+  }
+}
+
+extend kigcore.GameEvent {
+    optional DeathEvent death = 111;
+}
+
+message DeathEvent {
+  required string player = 1;
+  optional string killer = 5;
+  optional kigcore.BukkitDamageCause last_damage_cause = 6;
+}

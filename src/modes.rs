@@ -1,10 +1,12 @@
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, strum_macros::EnumString)]
+#[strum(serialize_all = "UPPERCASE")]
 pub enum GameMode {
     CAI,
     TIMV,
     BP,
     GRAV,
     BED,
+    Halloween2023,
 }
 
 impl GameMode {
@@ -14,7 +16,8 @@ impl GameMode {
             GameMode::TIMV => "Trouble in Mineville",
             GameMode::BP => "BlockParty",
             GameMode::GRAV => "Gravity",
-            GameMode::BED => "Bed Wars"
+            GameMode::BED => "Bed Wars",
+            GameMode::Halloween2023 => "Kig-o'-ween (2023)",
         }
     }
 
@@ -24,7 +27,8 @@ impl GameMode {
             GameMode::TIMV => "timv",
             GameMode::BP => "bp",
             GameMode::GRAV => "grav",
-            GameMode::BED => "bed"
+            GameMode::BED => "bed",
+            GameMode::Halloween2023 => "halloween2023",
         }
     }
 }

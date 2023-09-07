@@ -1,5 +1,5 @@
 use crate::protos::gamelog as log;
-use crate::protos::{bp, cai, grav, timv, herd, bed};
+use crate::protos::{bed, bp, cai, grav, halloween, herd, timv};
 
 pub enum EventType {
     Unknown,
@@ -39,4 +39,7 @@ pub enum EventType {
 
     // BED events
     BedBedDestruction(bed::BedDestructionEvent),
+
+    // Halloween events
+    HalloweenDeath(halloween::DeathEvent),
 }

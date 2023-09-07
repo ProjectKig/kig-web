@@ -23,7 +23,8 @@ fn main() {
             "protos/bp.proto",
             "protos/grav.proto",
             "protos/herd.proto",
-            "protos/bed.proto"
+            "protos/bed.proto",
+            "protos/halloween.proto",
         ])
         .include("protos")
         .run()

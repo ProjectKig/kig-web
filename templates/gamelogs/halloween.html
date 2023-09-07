@@ -1,0 +1,16 @@
+{% match match_evt %}
+{% when HalloweenDeath with (death) %}
+<i class="align-middle ri-close-line"></i>
+{% if death.has_killer() %}
+<strong>{{ death.get_player() }}</strong>
+was killed by
+<strong>{{ death.get_killer() }}</strong>.
+{% else %}
+<strong>{{ death.get_player() }}</strong>
+died.
+{% endif %}
+{% if death.has_last_damage_cause() %}
+<span class="badge rounded-pill bg-secondary">{{ death.get_last_damage_cause().get_damage_desc() }}</span>
+{% endif %}
+{% else %}
+{% endmatch %}

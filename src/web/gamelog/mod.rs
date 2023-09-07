@@ -37,6 +37,7 @@ mod bp;
 mod cai;
 mod event;
 mod grav;
+mod halloween;
 mod timv;
 
 lazy_static::lazy_static! {
@@ -89,6 +90,7 @@ pub enum WrappedExtension {
     Bp(bp::BpExtension),
     Grav(grav::GravExtension),
     Bed(bed::BedExtension),
+    Halloween(halloween::HalloweenExtension),
 }
 
 impl WrappedExtension {
@@ -100,6 +102,7 @@ impl WrappedExtension {
             Bp(ext) => Box::new(ext),
             Grav(ext) => Box::new(ext),
             Bed(ext) => Box::new(ext),
+            Halloween(ext) => Box::new(ext),
         }
     }
 }
@@ -113,6 +116,7 @@ impl GameMode {
             GameMode::BP => Bp(bp::BpExtension {}),
             GameMode::GRAV => Grav(grav::GravExtension::new(log)),
             GameMode::BED => Bed(bed::BedExtension::new(log)),
+            GameMode::Halloween2023 => Halloween(halloween::HalloweenExtension {}),
         }
     }
 }

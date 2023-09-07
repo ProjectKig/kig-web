@@ -13,10 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+pub mod bed;
 pub mod bp;
 pub mod cai;
 pub mod gamelog;
 pub mod grav;
-pub mod timv;
-pub mod bed;
+pub mod halloween;
 pub mod herd;
+pub mod timv;
