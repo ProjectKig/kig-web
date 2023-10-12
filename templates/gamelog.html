@@ -3,8 +3,7 @@
 
 {% block head %}
 <link href="/game-static/css/gamelog.css" rel="stylesheet">
-<meta name="description"
-    content="Read the overview of this game of {{ mode.get_full_name() }} on {{ map }}. Or play by connecting to playkig.com.">
+<meta name="description" content="Read the overview of this game of {{ mode.get_full_name() }} on {{ map }}. Or play by connecting to playkig.com.">
 <meta name="og:title" content="{{ mode.get_full_name() }}: Game {{ game_id }}">
 <meta name="og:url" content="https://playkig.com/game/{{ mode.get_database_id() }}/{{ game_id }}">
 <meta name="og:image"
@@ -27,8 +26,7 @@
 <div class="row">
     <div class="col-3">
         <div class="card w-100 h-100 mb-3">
-            <img src="/game-img/maps/{{ mode.get_database_id() }}/{{ map|map_file_name }}.png" class="card-img-top"
-                alt="Map thumbnail">
+            <img src="/game-img/maps/{{ mode.get_database_id() }}/{{ map|map_file_name }}.png" class="card-img-top" alt="Map thumbnail">
             <div class="card-body">
                 <h5 class="card-title text-center">{{ map }}</h5>
                 <p class="card-text text-center"><small class="text-muted">
@@ -45,13 +43,13 @@
         <div class="row">
             <div class="col">
                 <h2 class="display-6 text-center"><strong>Winner:</strong>
-                    {% let winner = winner.as_ref() %}
-                    {% if winner.is_some() %}
-                    {% let team = winner.unwrap() %}
+                {% let winner = winner.as_ref() %}
+                {% if winner.is_some() %}
+                {% let team = winner.unwrap() %}
                     <strong style="color: {{ team.color }}">{{ team.name }}</strong>
-                    {% else %}
+                {% else %}
                     Tie
-                    {% endif %}
+                {% endif %}
                 </h2>
             </div>
         </div>
@@ -67,8 +65,7 @@
                     <span class="align-middle"></span>
                     <script
                         type="text/javascript">document.write(new Date({{ log.get_game_start() }}).toLocaleString())</script>
-                    <small>(Your time)</small>
-                </span>&nbsp;
+                    <small>(Your time)</small></span>&nbsp;
                 <span class="text-outline darkgreen"><i class="align-middle ri-timer-line"></i>
                     <span class="align-middle">{{ duration|format_duration }}</span>
                 </span>
@@ -86,11 +83,10 @@
                         data-bs-target="#accord-data-{{ team.name }}" aria-expanded="true"
                         aria-controls="accord-data-{{ team.name }}">
                         <span style="color: {{team.color}}"><strong>{{ team.name }}</strong>
-                            ({{ team.players.len() }})</span>
-                        {% if functions.extension.supports_score() %}<span
-                            class="badge rounded-pill float-end bg-{% if !log.has_winner() %}warning{% else if log.get_winner() == team.name %}success{% else %}danger{% endif %}">{{
-                            team.score }}</span>
-                        {% endif %}
+                            ({{ team.players.len() }})</span> 
+                            {% if functions.extension.supports_score() %}<span
+                            class="badge rounded-pill float-end bg-{% if !log.has_winner() %}warning{% else if log.get_winner() == team.name %}success{% else %}danger{% endif %}">{{ team.score }}</span>
+                            {% endif %}
                     </button>
                 </h2>
                 <div id="accord-data-{{ team.name }}" class="accordion-collapse collapse show"
@@ -101,14 +97,15 @@
                             <li class="list-group-item">
                                 <div class="row">
                                     <div class="col-2">
-                                        <img alt="Skin" src="https://crafatar.com/avatars/{{ " {}"|format(player.uuid)
-                                            }}" height="32">
+                                        <img alt="Skin"
+                                            src="https://crafatar.com/avatars/{{ "{}"|format(player.uuid) }}"
+                                            height="32">
                                     </div>
                                     <div class="col">
                                         <span class="align-middle">{{ player.name }}
-                                            {% if player.nick.is_some() %}
-                                            <small>({{ player.nick.unwrap() }})</small>
-                                            {% endif %}
+                                        {% if player.nick.is_some() %}
+                                        <small>({{ player.nick.unwrap() }})</small>
+                                        {% endif %}
                                         </span>
                                     </div>
                                 </div>
@@ -152,45 +149,44 @@
                             {% let channel = time_evt.get_chat_channel(chat, self) %}
                             {% match channel %}
                             {% when ChatChannel::Static with (name) %}
-                            <span class="badge rounded-pill bg-dark text-white">{{ name }}</span>
+                                <span class="badge rounded-pill bg-dark text-white">{{ name }}</span>
                             {% when ChatChannel::Team with (name, color) %}
-                            <span class="badge rounded-pill bg-dark text-white"
-                                style="background-color: {{color}} !important;">{{ name }}</span>
+                                <span class="badge rounded-pill bg-dark text-white"
+                                    style="background-color: {{color}} !important;">{{ name }}</span>
                             {% when ChatChannel::None %}
                             {% endmatch %}
-                            <span style="color: {{chat.get_sender()|team_color(player_teams)}};"><strong>{{
-                                    chat.get_sender() }}</strong></span>:
+                                <span
+                                    style="color: {{chat.get_sender()|team_color(player_teams)}};"><strong>{{ chat.get_sender() }}</strong></span>:
                             {{ chat.get_message() }}
                             {% let count = chat.get_count() %}
                             {% if count > 1 %}
-                            <span class="badge rounded-pill bg-warning text-dark">x{{ count }}</span>
+                                <span class="badge rounded-pill bg-warning text-dark">x{{ count }}</span>
                             {% endif %}
                             {% when Join with (join) %}
                             {% let jt = join.get_team() %}
                             {% let team = jt|team_from_idx(teams) %}
-                            <i class="align-middle ri-user-add-fill"></i>
-                            <strong>{{ join.get_player() }}</strong> joined the <strong
-                                style="color: {{team.color}};">{{ team.name }}</strong>
+                                <i class="align-middle ri-user-add-fill"></i>
+                                <strong>{{ join.get_player() }}</strong> joined the <strong
+                                    style="color: {{team.color}};">{{ team.name }}</strong>
                             team.
                             {% when Leave with (leave) %}
-                            <i class="align-middle ri-user-unfollow-fill"></i>
-                            <strong style="color: {{leave.get_player()|team_color(player_teams)}};">{{
-                                leave.get_player() }}</strong> left.
+                                <i class="align-middle ri-user-unfollow-fill"></i>
+                                <strong style="color: {{leave.get_player()|team_color(player_teams)}};">{{ leave.get_player() }}</strong> left.
                             {% else %}
                             {% include "gamelogs/herd.html" %}
                             {% match mode %}
-                            {% when GameMode::CAI %}
-                            {% include "gamelogs/cai.html" %}
-                            {% when GameMode::TIMV %}
-                            {% include "gamelogs/timv.html" %}
-                            {% when GameMode::BP %}
-                            {% include "gamelogs/bp.html" %}
-                            {% when GameMode::GRAV %}
-                            {% include "gamelogs/grav.html" %}
-                            {% when GameMode::BED %}
-                            {% include "gamelogs/bed.html" %}
-                            {% when GameMode::Halloween2023 %}
-                            {% include "gamelogs/halloween.html" %}
+                                {% when GameMode::CAI %}
+                                    {% include "gamelogs/cai.html" %}
+                                {% when GameMode::TIMV %}
+                                    {% include "gamelogs/timv.html" %}
+                                {% when GameMode::BP %}
+                                    {% include "gamelogs/bp.html" %}
+                                {% when GameMode::GRAV %}
+                                    {% include "gamelogs/grav.html" %}
+                                {% when GameMode::BED %}
+                                    {% include "gamelogs/bed.html" %}
+                                {% when GameMode::Halloween2023 %}
+                                    {% include "gamelogs/halloween.html" %}
                             {% endmatch %}
                             {% endmatch %}
                         </span>
