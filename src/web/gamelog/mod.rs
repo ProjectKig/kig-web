@@ -116,7 +116,9 @@ impl GameMode {
             GameMode::BP => Bp(bp::BpExtension {}),
             GameMode::GRAV => Grav(grav::GravExtension::new(log)),
             GameMode::BED => Bed(bed::BedExtension::new(log)),
-            GameMode::Halloween2023 => Halloween(halloween::HalloweenExtension {}),
+            GameMode::Halloween2023 | GameMode::Halloween2024 => {
+                Halloween(halloween::HalloweenExtension {})
+            }
         }
     }
 }
