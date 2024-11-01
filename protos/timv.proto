@@ -17,6 +17,7 @@ extend kigcore.GameEvent {
   optional BodyEvent body = 112;
   optional TrapEvent trap = 113;
   optional DetectiveBodyEvent detective = 114;
+  optional SubrolePsychicReportEvent psychic = 115;
 }
 
 message DeathEvent {
@@ -52,4 +53,9 @@ message TrapEvent { required string player = 1; }
 message DetectiveBodyEvent {
   required string player = 1;
   required string identifier = 2;
+}
+
+message SubrolePsychicReportEvent {
+  required string psychic = 1;
+  repeated string reported = 2;
 }

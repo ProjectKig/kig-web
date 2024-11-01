@@ -36,5 +36,10 @@ inspected
 by
 <strong style="color: {{detective.get_identifier()|team_color(player_teams)}};">{{ detective.get_identifier()
     }}</strong>.
+{% when TimvPsychicReport with (psychic) %}
+<i class="ri-psychotherapy-fill"></i>
+<strong style="color: {{psychic.get_psychic()|team_color(player_teams)}};">{{ psychic.get_psychic() }}</strong>
+(Psychic) received
+the report: <strong>{{ psychic.get_reported()|join(", ") }}</strong>
 {% else %}
 {% endmatch %}
