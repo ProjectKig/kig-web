@@ -54,6 +54,8 @@ impl DeathEvent {
             DeathEvent_DeathCause::WOLF => "Wolf",
             DeathEvent_DeathCause::TESTER_BOMB => "Tester Bomb",
             DeathEvent_DeathCause::CAT => "Cat",
+            DeathEvent_DeathCause::ENDER_CHEST => "Ender Chest",
+            DeathEvent_DeathCause::ZOMBIE => "Zombie",
         }
     }
 }

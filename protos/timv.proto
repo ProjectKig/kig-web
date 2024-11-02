@@ -31,6 +31,8 @@ message DeathEvent {
     WOLF = 6;
     TESTER_BOMB = 7;
     CAT = 8;
+    ENDER_CHEST = 9;
+    ZOMBIE = 10;
   }
   required DeathCause cause = 2;
   optional string killer = 3;
