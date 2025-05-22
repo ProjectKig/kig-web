@@ -346,10 +346,10 @@ impl BukkitDamageCause {
             BukkitDamageCause::PROJECTILE => "Projectile",
             BukkitDamageCause::VOID => "Void",
             BukkitDamageCause::SUFFOCATION => "Suffocation",
-            BukkitDamageCause::FIRE => "Fire",
-            BukkitDamageCause::FIRE_TICK => "Fire",
+            BukkitDamageCause::FIRE | BukkitDamageCause::FIRE_TICK => "Fire",
             BukkitDamageCause::FALL => "Fall",
             BukkitDamageCause::DROWNING => "Drowning",
+            BukkitDamageCause::LAVA => "Lava",
             BukkitDamageCause::OTHER => "Unknown cause",
         }
     }

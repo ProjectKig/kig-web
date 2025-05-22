@@ -33,6 +33,9 @@ message DeathEvent {
     CAT = 8;
     ENDER_CHEST = 9;
     ZOMBIE = 10;
+    POISONOUS_WATER = 11;
+    MAP_VOID = 12;
+    MAP_FEATURE = 13;
   }
   required DeathCause cause = 2;
   optional string killer = 3;

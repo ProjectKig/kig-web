@@ -56,6 +56,9 @@ impl DeathEvent {
             DeathEvent_DeathCause::CAT => "Cat",
             DeathEvent_DeathCause::ENDER_CHEST => "Ender Chest",
             DeathEvent_DeathCause::ZOMBIE => "Zombie",
+            DeathEvent_DeathCause::POISONOUS_WATER => "Poisonous Water",
+            DeathEvent_DeathCause::MAP_VOID => "Map Void",
+            DeathEvent_DeathCause::MAP_FEATURE => "Map Feature",
         }
     }
 }

@@ -15,6 +15,7 @@ enum BukkitDamageCause {
   OTHER = 7;
   FALL = 8;
   DROWNING = 9;
+  LAVA = 10;
 }
 
 message Player {
