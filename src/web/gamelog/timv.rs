@@ -12,9 +12,9 @@ impl GameLogExtension for TimvExtension {
             EventType::TimvTrap(_) => "list-group-item-danger",
             EventType::TimvBody(_) => "list-group-item-warning",
             EventType::TimvDeath(_) => "list-group-item-secondary",
-            EventType::TimvDetectiveBody(_) | EventType::TimvPsychicReport(_) => {
-                "list-group-item-primary"
-            }
+            EventType::TimvDetectiveBody(_)
+            | EventType::TimvPsychicReport(_)
+            | EventType::TimvSharedPurchase(_) => "list-group-item-primary",
             _ => "",
         }
     }
@@ -33,6 +33,8 @@ impl GameLogExtension for TimvExtension {
             EventType::TimvDetectiveBody(event)
         } else if let Some(event) = psychic.get(event) {
             EventType::TimvPsychicReport(event)
+        } else if let Some(event) = shared_purchase.get(event) {
+            EventType::TimvSharedPurchase(event)
         } else {
             EventType::Unknown
         }

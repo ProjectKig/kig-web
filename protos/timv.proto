@@ -18,6 +18,7 @@ extend kigcore.GameEvent {
   optional TrapEvent trap = 113;
   optional DetectiveBodyEvent detective = 114;
   optional SubrolePsychicReportEvent psychic = 115;
+  optional SharedPointsPurchaseEvent shared_purchase = 116;
 }
 
 message DeathEvent {
@@ -63,4 +64,9 @@ message DetectiveBodyEvent {
 message SubrolePsychicReportEvent {
   required string psychic = 1;
   repeated string reported = 2;
+}
+
+message SharedPointsPurchaseEvent {
+  required string purchaser = 1;
+  required string item = 2;
 }
