@@ -1,27 +1,29 @@
 {% match match_evt %}
 {% when TimvTest with (test) %}
 <i class="align-middle ri-eye-fill"></i>
-<strong style="color: {{test.get_player()|team_color(player_teams)}};">{{ test.get_player() }}</strong>
+<strong style="color: {{test.get_player()|team_color(player_teams, evt_id)}};">{{ test.get_player() }}</strong>
 tested.
 {% if test.get_spoofed() %}
 <span class="badge rounded-pill bg-primary">Spoofed</span>
 {% endif %}
 {% when TimvTrap with (trap) %}
-<strong style="color: {{trap.get_player()|team_color(player_teams)}};">{{ trap.get_player() }}</strong> activated a
+<strong style="color: {{trap.get_player()|team_color(player_teams, evt_id)}};">{{ trap.get_player() }}</strong>
+activated a
 traitor trap.
 {% when TimvBody with (body) %}
 <i class="ri-search-eye-fill"></i>
-<strong style="color: {{body.get_player()|team_color(player_teams)}};">{{ body.get_player() }}</strong>'s body was found
+<strong style="color: {{body.get_player()|team_color(player_teams, evt_id)}};">{{ body.get_player() }}</strong>'s body
+was found
 by
-<strong style="color: {{body.get_identifier()|team_color(player_teams)}};">{{ body.get_identifier() }}</strong>.
+<strong style="color: {{body.get_identifier()|team_color(player_teams, evt_id)}};">{{ body.get_identifier() }}</strong>.
 {% when TimvDeath with (death) %}
 <i class="align-middle ri-close-line"></i>
 {% if death.has_killer() %}
-<strong style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
+<strong style="color: {{death.get_player()|team_color(player_teams, evt_id)}};">{{ death.get_player() }}</strong>
 was killed by
-<strong style="color: {{death.get_killer()|team_color(player_teams)}};">{{ death.get_killer() }}</strong>.
+<strong style="color: {{death.get_killer()|team_color(player_teams, evt_id)}};">{{ death.get_killer() }}</strong>.
 {% else %}
-<strong style="color: {{death.get_player()|team_color(player_teams)}};">{{ death.get_player() }}</strong>
+<strong style="color: {{death.get_player()|team_color(player_teams, evt_id)}};">{{ death.get_player() }}</strong>
 died.
 {% endif %}
 <span class="badge rounded-pill bg-secondary">{{ death.get_damage_desc() }}</span>
@@ -30,20 +32,22 @@ died.
 {% endif %}
 {% when TimvDetectiveBody with (detective) %}
 <i class="ri-search-eye-fill"></i>
-<strong style="color: {{detective.get_player()|team_color(player_teams)}};">{{ detective.get_player() }}</strong>'s body
+<strong style="color: {{detective.get_player()|team_color(player_teams, evt_id)}};">{{ detective.get_player()
+    }}</strong>'s body
 was
 inspected
 by
-<strong style="color: {{detective.get_identifier()|team_color(player_teams)}};">{{ detective.get_identifier()
+<strong style="color: {{detective.get_identifier()|team_color(player_teams, evt_id)}};">{{ detective.get_identifier()
     }}</strong>.
 {% when TimvPsychicReport with (psychic) %}
 <i class="ri-psychotherapy-fill"></i>
-<strong style="color: {{psychic.get_psychic()|team_color(player_teams)}};">{{ psychic.get_psychic() }}</strong>
+<strong style="color: {{psychic.get_psychic()|team_color(player_teams, evt_id)}};">{{ psychic.get_psychic() }}</strong>
 (Psychic) received
 the report: <strong>{{ psychic.get_reported()|join(", ") }}</strong>
 {% when TimvSharedPurchase with (shared_purchase) %}
 <i class="ri-shopping-basket-fill"></i>
-<strong style="color: {{shared_purchase.get_purchaser()|team_color(player_teams)}};">{{ shared_purchase.get_purchaser()
+<strong style="color: {{shared_purchase.get_purchaser()|team_color(player_teams, evt_id)}};">{{
+    shared_purchase.get_purchaser()
     }}</strong>
 bought <strong>{{ shared_purchase.get_item() }}</strong>
 {% else %}

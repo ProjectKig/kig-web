@@ -29,7 +29,7 @@ use cached::{proc_macro::cached, TimedCache};
 use event::EventType::{self, *};
 use gamelog::{BukkitDamageCause, ChatEvent, GameEvent};
 use regex::Regex;
-use std::{borrow::Cow, str::FromStr};
+use std::{borrow::Cow, iter::FromIterator, str::FromStr};
 use std::{collections::HashMap, convert::TryInto, fmt};
 
 mod bed;
@@ -59,7 +59,7 @@ struct GamelogTemplate<'a> {
     game_id: &'a str,
     teams: Vec<Team<'a>>,
     events: Vec<WrappedEvent>,
-    player_teams: HashMap<&'a str, &'a Team<'a>>,
+    player_teams: PlayerTeamMap<'a>,
     winner: Option<Team<'a>>,
     mode: GameMode,
     functions: Functions,
@@ -146,6 +146,7 @@ pub struct Team<'a> {
 }
 
 pub struct WrappedEvent {
+    id: usize,
     event: EventType,
     time: i32,
 }
@@ -155,6 +156,8 @@ enum ChatChannel<'a> {
     Team(&'a str, &'static str),
     None,
 }
+
+struct PlayerTeamMap<'a>(HashMap<&'a str, Vec<(usize, &'a Team<'a>)>>);
 
 #[cached(
     type = "TimedCache<(Vec<u8>, GameMode), (GameLog, GameLogMeta)>",
@@ -219,12 +222,19 @@ pub async fn gamelog_by_id(
                             })
                         })
                 });
-            let player_teams = teams
-                .iter()
-                .flat_map(|t| t.players.iter().map(move |p| (p.name, t)))
-                .collect();
+
             let extension = mode.to_gamelog_ext(&log);
             let extension_ptr = extension.clone().boxed();
+
+            let events: Vec<WrappedEvent> = log
+                .get_events()
+                .iter()
+                .enumerate()
+                .map(|(i, e)| WrappedEvent::parse(i, e, &*extension_ptr))
+                .collect();
+
+            let player_teams = PlayerTeamMap::new(&teams, &events);
+
             let render = GamelogTemplate {
                 log: &log,
                 total_players: if log.get_start_players() == 0 {
@@ -234,11 +244,7 @@ pub async fn gamelog_by_id(
                 },
                 game_id: &path_id,
                 teams: teams.clone(),
-                events: log
-                    .get_events()
-                    .iter()
-                    .map(|e| WrappedEvent::parse(e, &*extension_ptr))
-                    .collect(),
+                events,
                 player_teams,
                 winner,
                 mode,
@@ -274,9 +280,10 @@ impl Functions {
 }
 
 impl WrappedEvent {
-    fn parse(event: &TimeEvent, extension: &dyn GameLogExtension) -> Self {
+    fn parse(id: usize, event: &TimeEvent, extension: &dyn GameLogExtension) -> Self {
         let time = event.get_time();
         WrappedEvent {
+            id,
             time,
             event: Self::parse_event(event, extension),
         }
@@ -302,6 +309,10 @@ impl WrappedEvent {
         }
     }
 
+    fn get_id(&self) -> usize {
+        self.id
+    }
+
     fn get_time(&self) -> i32 {
         self.time
     }
@@ -312,6 +323,7 @@ impl WrappedEvent {
 
     fn get_chat_channel<'a>(
         &self,
+        event_id: &usize,
         event: &ChatEvent,
         log: &GamelogTemplate<'a>,
     ) -> ChatChannel<'a> {
@@ -321,7 +333,7 @@ impl WrappedEvent {
                 ChatEvent_ChatType::TEAM => if event.has_team() {
                     log.teams.get(event.get_team() as usize)
                 } else {
-                    log.player_teams.get(event.get_sender()).copied()
+                    log.player_teams.get_team_at(event.get_sender(), *event_id)
                 }
                 .map(|t| ChatChannel::Team(t.name, t.color))
                 .unwrap_or_else(|| ChatChannel::Team(SPECTATORS.name, SPECTATORS.color)),
@@ -352,6 +364,36 @@ impl BukkitDamageCause {
             BukkitDamageCause::LAVA => "Lava",
             BukkitDamageCause::OTHER => "Unknown cause",
         }
+    }
+}
+
+impl<'a> PlayerTeamMap<'a> {
+    fn new(teams: &'a [Team<'a>], events: &[WrappedEvent]) -> Self {
+        let mut res = Self(
+            teams
+                .iter()
+                .flat_map(|t| t.players.iter().map(move |p| (p.name, vec![(0, t)])))
+                .collect(),
+        );
+        // Team change events
+        for event in events {
+            if let EventType::Join(join) = &event.event {
+                let player = join.get_player();
+                let team = teams.get(join.get_team() as usize).unwrap_or(&SPECTATORS);
+                if let Some(teams) = res.0.get_mut(player) {
+                    teams.push((event.id, team));
+                }
+            }
+        }
+        res
+    }
+
+    fn get_team_at(&self, player: &str, event_id: usize) -> Option<&Team<'a>> {
+        self.0
+            .get(player)
+            .and_then(|teams| teams.iter().rev().find(|(min_id, _)| event_id >= *min_id))
+            .map(|(_, team)| team)
+            .copied()
     }
 }
 
@@ -422,8 +464,10 @@ fn format_duration(millis: i32) -> String {
 }
 
 mod filters {
+    use crate::web::gamelog::PlayerTeamMap;
+
     pub use super::grav::filters::*;
-    use std::{borrow::Cow, collections::HashMap};
+    use std::borrow::Cow;
 
     use super::Team;
 
@@ -450,11 +494,14 @@ mod filters {
 
     pub fn team_color<'a>(
         player: &'a str,
-        player_teams: &'a HashMap<&str, &Team<'a>>,
+        player_teams: &'a PlayerTeamMap<'a>,
+        event_id: &usize,
     ) -> askama::Result<Cow<'a, str>> {
-        Ok(match player_teams.get(player).map(|t| t.color) {
-            Some(color) => Cow::Owned(format!("{} !important", color)),
-            None => Cow::Borrowed("#000000"),
-        })
+        Ok(
+            match player_teams.get_team_at(player, *event_id).map(|t| t.color) {
+                Some(color) => Cow::Owned(format!("{} !important", color)),
+                None => Cow::Borrowed("#000000"),
+            },
+        )
     }
 }
