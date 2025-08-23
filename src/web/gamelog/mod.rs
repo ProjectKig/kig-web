@@ -18,6 +18,7 @@ use crate::{
     error::Result,
     modes::GameMode,
     protos::gamelog::{self, ChatEvent_ChatType, GameLog, TimeEvent},
+    web::get_current_year,
     AppState,
 };
 use actix_web::{
@@ -29,8 +30,8 @@ use cached::{proc_macro::cached, TimedCache};
 use event::EventType::{self, *};
 use gamelog::{BukkitDamageCause, ChatEvent, GameEvent};
 use regex::Regex;
-use std::{borrow::Cow, iter::FromIterator, str::FromStr};
-use std::{collections::HashMap, convert::TryInto, fmt};
+use std::{borrow::Cow, str::FromStr};
+use std::{collections::HashMap, convert::TryInto, fmt, time::Duration};
 
 mod bed;
 mod bp;
@@ -65,6 +66,7 @@ struct GamelogTemplate<'a> {
     functions: Functions,
     extension: WrappedExtension,
     server: Option<String>,
+    current_year: String,
 }
 
 // Extensions - each mode can implement its own version
@@ -157,11 +159,11 @@ enum ChatChannel<'a> {
     None,
 }
 
-struct PlayerTeamMap<'a>(HashMap<&'a str, Vec<(usize, &'a Team<'a>)>>);
+pub struct PlayerTeamMap<'a>(HashMap<&'a str, Vec<(usize, &'a Team<'a>)>>);
 
 #[cached(
-    type = "TimedCache<(Vec<u8>, GameMode), (GameLog, GameLogMeta)>",
-    create = "{ TimedCache::with_lifespan(120) }",
+    ty = "TimedCache<(Vec<u8>, GameMode), (GameLog, GameLogMeta)>",
+    create = "{ TimedCache::with_lifespan(Duration::from_secs(120)) }",
     convert = "{ (id.clone(), mode) }",
     result
 )]
@@ -253,6 +255,7 @@ pub async fn gamelog_by_id(
                 },
                 extension,
                 server: meta.server,
+                current_year: get_current_year(),
             }
             .render()
             .unwrap();

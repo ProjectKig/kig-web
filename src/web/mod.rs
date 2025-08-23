@@ -15,6 +15,9 @@
 
 use actix_files::Files;
 use actix_web::{web, Scope};
+use cached::proc_macro::once;
+use std::time::Duration;
+use time::OffsetDateTime;
 
 mod gamelog;
 
@@ -36,4 +39,10 @@ pub fn images() -> Files {
 
 pub fn images_fallback() -> Files {
     Files::new("/game-img", "img")
+}
+
+#[once(time = 3600)]
+fn get_current_year() -> String {
+    let time = OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc());
+    time.year().to_string()
 }

@@ -22,12 +22,13 @@ lazy_static = "1"
 askama = "0.10"
 askama_derive = "0.10"
 actix-web = "3"
-cached = "0.23"
+cached = { version = "0.56", features = ["async"] }
 actix-files = "0.5"
 
 # Misc
 strum = "0.20"
 strum_macros = "0.20"
+time = { version = "0.3", features = ["local-offset"] }
 
 [build-dependencies]
 # Gamelog deserialization
