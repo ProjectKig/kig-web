@@ -23,6 +23,7 @@ pub enum EventType {
     TimvDetectiveBody(timv::DetectiveBodyEvent),
     TimvPsychicReport(timv::SubrolePsychicReportEvent),
     TimvSharedPurchase(timv::SharedPointsPurchaseEvent),
+    TimvRampageGoal(timv::RampageGoalEvent),
 
     // BP events
     BpDeath(bp::DeathEvent),

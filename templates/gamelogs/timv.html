@@ -50,5 +50,13 @@ the report: <strong>{{ psychic.get_reported()|join(", ") }}</strong>
     shared_purchase.get_purchaser()
     }}</strong>
 bought <strong>{{ shared_purchase.get_item() }}</strong>
+{% when TimvRampageGoal with (rampage_goal) %}
+{% let t = rampage_goal.get_team() %}
+{% let team = t|team_from_idx_u32(teams) %}
+<i class="ri-flag-fill"></i>
+<strong style="color: {{team.color}};">{{ team.name }}</strong>
+completed the
+<strong>{{ rampage_goal.get_goal() }}</strong>
+goal.
 {% else %}
 {% endmatch %}

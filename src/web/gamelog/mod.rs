@@ -495,6 +495,13 @@ mod filters {
         Ok(teams.get(*idx as usize).unwrap_or(&super::SPECTATORS))
     }
 
+    pub fn team_from_idx_u32<'a>(
+        idx: &'a u32,
+        teams: &'a [Team<'a>],
+    ) -> askama::Result<&'a Team<'a>> {
+        Ok(teams.get(*idx as usize).unwrap_or(&super::SPECTATORS))
+    }
+
     pub fn team_color<'a>(
         player: &'a str,
         player_teams: &'a PlayerTeamMap<'a>,

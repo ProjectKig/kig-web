@@ -19,6 +19,7 @@ extend kigcore.GameEvent {
   optional DetectiveBodyEvent detective = 114;
   optional SubrolePsychicReportEvent psychic = 115;
   optional SharedPointsPurchaseEvent shared_purchase = 116;
+  optional RampageGoalEvent rampage_goal = 117;
 }
 
 message DeathEvent {
@@ -69,4 +70,9 @@ message SubrolePsychicReportEvent {
 message SharedPointsPurchaseEvent {
   required string purchaser = 1;
   required string item = 2;
+}
+
+message RampageGoalEvent {
+  required uint32 team = 1;
+  required string goal = 2;
 }
