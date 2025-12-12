@@ -1,25 +1,25 @@
 {% match match_evt %}
 {% when GravStageCompletion with (stage_completion) %}
 <i class="align-middle ri-play-circle-fill"></i>
-<strong>{{ stage_completion.get_player() }}</strong> finished <strong data-bs-toggle="tooltip" data-bs-placement="top"
-    title="{{ stage_completion.get_stage_index()|grav_stage_name(extension) }}">Stage {{
-    stage_completion.get_stage_index() + 1
-    }}</strong> in <strong>{{ stage_completion.get_time()|grav_format_time}}</strong>.
-{% if stage_completion.get_skipped() %}
+<strong>{{ stage_completion.player() }}</strong> finished <strong data-bs-toggle="tooltip" data-bs-placement="top"
+    title="{{ stage_completion.stage_index()|grav_stage_name(extension) }}">Stage {{
+    stage_completion.stage_index() + 1
+    }}</strong> in <strong>{{ stage_completion.time()|grav_format_time}}</strong>.
+{% if stage_completion.skipped() %}
 <span class="badge rounded-pill bg-primary">Skipped</span>
 {% endif %}
 {% when GravGameFinish with (game_finish) %}
 <i class="align-middle ri-star-fill"></i>
-<strong>{{ game_finish.get_player() }}</strong> finished <strong>#{{ game_finish.get_place() }}</strong> in <strong>{{
-    game_finish.get_time()|grav_format_time}}</strong>.
+<strong>{{ game_finish.player() }}</strong> finished <strong>#{{ game_finish.place() }}</strong> in <strong>{{
+    game_finish.time()|grav_format_time}}</strong>.
 {% when GravHardcoreFail with (hardcore_fail) %}
 <i class="align-middle ri-close-line"></i>
-<strong>{{ hardcore_fail.get_player() }}</strong> died in <strong>Hardcore Mode</strong> on <strong
+<strong>{{ hardcore_fail.player() }}</strong> died in <strong>Hardcore Mode</strong> on <strong
     data-bs-toggle="tooltip" data-bs-placement="top"
-    title="{{ hardcore_fail.get_stage()|grav_stage_name(extension) }}">Stage {{
-    hardcore_fail.get_stage() + 1
+    title="{{ hardcore_fail.stage()|grav_stage_name(extension) }}">Stage {{
+    hardcore_fail.stage() + 1
     }}</strong>.
-{% if hardcore_fail.get_field_final() %}
+{% if hardcore_fail.final_() %}
 <span class="badge rounded-pill bg-danger">Eliminated</span>
 {% endif %}
 {% else %}

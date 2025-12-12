@@ -19,7 +19,7 @@
 
 {% block content %}
 {% let map = functions.get_map(log) %}
-{% let duration = log.get_game_end() - log.get_game_start() %}
+{% let duration = log.game_end() - log.game_start() %}
 <div class="row mb-2">
     <h1 class="text-center display-5"><strong>{{ mode.get_full_name() }} </strong> Game <small>{{ game_id }}</small>
     </h1>
@@ -66,7 +66,7 @@
                 <span class="text-outline blue"><i class="align-middle ri-calendar-event-fill"></i>
                     <span class="align-middle"></span>
                     <script
-                        type="text/javascript">document.write(new Date({{ log.get_game_start() }}).toLocaleString())</script>
+                        type="text/javascript">document.write(new Date({{ log.game_start() }}).toLocaleString())</script>
                     <small>(Your time)</small>
                 </span>&nbsp;
                 <span class="text-outline darkgreen"><i class="align-middle ri-timer-line"></i>
@@ -88,7 +88,7 @@
                         <span style="color: {{team.color}}"><strong>{{ team.name }}</strong>
                             ({{ team.players.len() }})</span>
                         {% if functions.extension.supports_score() %}<span
-                            class="badge rounded-pill float-end bg-{% if !log.has_winner() %}warning{% else if log.get_winner() == team.name %}success{% else %}danger{% endif %}">{{
+                            class="badge rounded-pill float-end bg-{% if !log.has_winner() %}warning{% else if log.winner() == team.name %}success{% else %}danger{% endif %}">{{
                             team.score }}</span>
                         {% endif %}
                     </button>
@@ -101,15 +101,24 @@
                             <li class="list-group-item">
                                 <div class="row">
                                     <div class="col-2">
-                                        <img alt="Skin" src="https://crafatar.com/avatars/{{"{}"|format(player.uuid)}}"
-                                            height="32">
+                                        {% if player.nick.is_some() && nicks_hidden %}
+                                            <img alt="Skin" src="https://crafthead.net/avatar/c06f89064c8a49119c29ea1dbd1aab82" height="32">
+                                        {% else %}
+                                            <img alt="Skin" src="https://crafthead.net/avatar/{{"{}"|format(player.uuid)}}" height="32">
+                                        {% endif %}
                                     </div>
                                     <div class="col">
-                                        <span class="align-middle">{{ player.name }}
-                                            {% if player.nick.is_some() %}
-                                            <small>({{ player.nick.unwrap() }})</small>
-                                            {% endif %}
-                                        </span>
+                                        {% if player.nick.is_some() %}
+                                            <span class="align-middle">{{ player.nick.unwrap() }}
+                                                {% if nicks_hidden %}
+                                                    <small>(<i>nick</i>)</small>
+                                                {% else %}
+                                                    <small>({{ player.name }})</small>
+                                                {% endif %}
+                                            </span>
+                                        {% else %}
+                                            <span class="align-middle">{{ player.name }}</span>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </li>
@@ -159,24 +168,24 @@
                                 style="background-color: {{color}} !important;">{{ name }}</span>
                             {% when ChatChannel::None %}
                             {% endmatch %}
-                            <span style="color: {{chat.get_sender()|team_color(player_teams, evt_id)}};"><strong>{{
-                                    chat.get_sender() }}</strong></span>:
-                            {{ chat.get_message() }}
-                            {% let count = chat.get_count() %}
+                            <span style="color: {{chat.sender()|team_color(player_teams, evt_id)}};"><strong>{{
+                                    chat.sender() }}</strong></span>:
+                            {{ chat.message() }}
+                            {% let count = chat.count() %}
                             {% if count > 1 %}
                             <span class="badge rounded-pill bg-warning text-dark">x{{ count }}</span>
                             {% endif %}
                             {% when Join with (join) %}
-                            {% let jt = join.get_team() %}
+                            {% let jt = join.team() %}
                             {% let team = jt|team_from_idx(teams) %}
                             <i class="align-middle ri-user-add-fill"></i>
-                            <strong>{{ join.get_player() }}</strong> joined the <strong
+                            <strong>{{ join.player() }}</strong> joined the <strong
                                 style="color: {{team.color}};">{{ team.name }}</strong>
                             team.
                             {% when Leave with (leave) %}
                             <i class="align-middle ri-user-unfollow-fill"></i>
-                            <strong style="color: {{leave.get_player()|team_color(player_teams, evt_id)}};">{{
-                                leave.get_player() }}</strong> left.
+                            <strong style="color: {{leave.player()|team_color(player_teams, evt_id)}};">{{
+                                leave.player() }}</strong> left.
                             {% else %}
                             {% include "gamelogs/herd.html" %}
                             {% match mode %}

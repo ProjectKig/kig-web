@@ -82,6 +82,7 @@ message GameLog {
   required int64 game_end = 4;
   required int32 start_players = 5;
   repeated TimeEvent events = 6;
+  optional int32 nick_embargo = 8;
   // Keep backwards-compatibility with old CAI logs that had the map as an
   // extension with ID 110
   optional string map = 110;

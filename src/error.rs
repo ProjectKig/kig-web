@@ -17,7 +17,7 @@ use std::fmt::Display;
 
 use actix_web::{dev::Body, http::StatusCode, HttpResponse, ResponseError};
 use mongodb::bson::document::ValueAccessError;
-use protobuf::ProtobufError;
+use protobuf::Error as ProtobufError;
 
 pub type Result<T> = std::result::Result<T, Error>;
 

@@ -1,31 +1,31 @@
 {% match match_evt %}
 {% when CaiCatch with (catch) %}
 <i class="align-middle ri-eye-fill"></i>
-<strong style="color: {{catch.get_leader()|team_color(player_teams, evt_id)}};">{{ catch.get_leader() }}</strong>
+<strong style="color: {{catch.leader()|team_color(player_teams, evt_id)}};">{{ catch.leader() }}</strong>
 was caught by
-<strong style="color: {{catch.get_carrier()|team_color(player_teams, evt_id)}};">{{ catch.get_carrier() }}</strong>.
+<strong style="color: {{catch.carrier()|team_color(player_teams, evt_id)}};">{{ catch.carrier() }}</strong>.
 {% when CaiEscape with (escape) %}
 <i class="align-middle ri-{% if escape.has_saver() %}shield-star-fill{% else %}eye-off-fill{% endif %}"></i>
-<strong style="color: {{escape.get_leader()|team_color(player_teams, evt_id)}};">{{ escape.get_leader() }}</strong>
+<strong style="color: {{escape.leader()|team_color(player_teams, evt_id)}};">{{ escape.leader() }}</strong>
 escaped.
 <span class="badge rounded-pill bg-primary">{% if escape.has_saver() %}Saved by
-    <strong>{{ escape.get_saver() }}</strong>{% else if escape.has_chance() %}Rolled
-    {{ "{:.1}"|format(escape.get_chance()) }}%{% endif %}</span>
+    <strong>{{ escape.saver() }}</strong>{% else if escape.has_chance() %}Rolled
+    {{ "{:.1}"|format(escape.chance()) }}%{% endif %}</span>
 {% when CaiCapture with (capture) %}
 <i class="align-middle ri-star-fill"></i>
-<strong style="color: {{capture.get_leader()|team_color(player_teams, evt_id)}};">{{ capture.get_leader() }}</strong>
+<strong style="color: {{capture.leader()|team_color(player_teams, evt_id)}};">{{ capture.leader() }}</strong>
 was captured by
-<strong style="color: {{capture.get_carrier()|team_color(player_teams, evt_id)}};">{{ capture.get_carrier() }}</strong>.
+<strong style="color: {{capture.carrier()|team_color(player_teams, evt_id)}};">{{ capture.carrier() }}</strong>.
 {% when CaiDeath with (death) %}
 <i class="align-middle ri-close-line"></i>
 {% if death.has_killer() %}
-<strong style="color: {{death.get_player()|team_color(player_teams, evt_id)}};">{{ death.get_player() }}</strong>
+<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player() }}</strong>
 was killed by
-<strong style="color: {{death.get_killer()|team_color(player_teams, evt_id)}};">{{ death.get_killer() }}</strong>.
+<strong style="color: {{death.killer()|team_color(player_teams, evt_id)}};">{{ death.killer() }}</strong>.
 {% else %}
-<strong style="color: {{death.get_player()|team_color(player_teams, evt_id)}};">{{ death.get_player() }}</strong>
+<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player() }}</strong>
 died.
 {% endif %}
-<span class="badge rounded-pill bg-secondary">{{ death.get_cause().get_damage_desc() }}</span>
+<span class="badge rounded-pill bg-secondary">{{ death.cause().get_damage_desc() }}</span>
 {% else %}
 {% endmatch %}

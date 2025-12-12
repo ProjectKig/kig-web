@@ -1,4 +1,4 @@
-use crate::protos::timv::{DeathEvent, DeathEvent_DeathCause};
+use crate::protos::timv::{death_event::DeathCause, DeathEvent};
 
 use super::{event::EventType, GameLogExtension};
 
@@ -50,20 +50,20 @@ impl GameLogExtension for TimvExtension {
 
 impl DeathEvent {
     pub fn get_damage_desc(&self) -> &'static str {
-        match self.get_cause() {
-            DeathEvent_DeathCause::BUKKIT => self.get_last_damage_cause().get_damage_desc(),
-            DeathEvent_DeathCause::CLAYMORE => "Claymore",
-            DeathEvent_DeathCause::SUICIDE_BOMB => "Suicide Bomb",
-            DeathEvent_DeathCause::TRAITOR_TRAP => "Trap",
-            DeathEvent_DeathCause::CREEPER => "Creepers",
-            DeathEvent_DeathCause::WOLF => "Wolf",
-            DeathEvent_DeathCause::TESTER_BOMB => "Tester Bomb",
-            DeathEvent_DeathCause::CAT => "Cat",
-            DeathEvent_DeathCause::ENDER_CHEST => "Ender Chest",
-            DeathEvent_DeathCause::ZOMBIE => "Zombie",
-            DeathEvent_DeathCause::POISONOUS_WATER => "Poisonous Water",
-            DeathEvent_DeathCause::MAP_VOID => "Map Void",
-            DeathEvent_DeathCause::MAP_FEATURE => "Map Feature",
+        match self.cause() {
+            DeathCause::BUKKIT => self.last_damage_cause().get_damage_desc(),
+            DeathCause::CLAYMORE => "Claymore",
+            DeathCause::SUICIDE_BOMB => "Suicide Bomb",
+            DeathCause::TRAITOR_TRAP => "Trap",
+            DeathCause::CREEPER => "Creepers",
+            DeathCause::WOLF => "Wolf",
+            DeathCause::TESTER_BOMB => "Tester Bomb",
+            DeathCause::CAT => "Cat",
+            DeathCause::ENDER_CHEST => "Ender Chest",
+            DeathCause::ZOMBIE => "Zombie",
+            DeathCause::POISONOUS_WATER => "Poisonous Water",
+            DeathCause::MAP_VOID => "Map Void",
+            DeathCause::MAP_FEATURE => "Map Feature",
         }
     }
 }

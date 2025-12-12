@@ -13,7 +13,7 @@ mongodb = { version = "1.1.1", default-features = false, features = ["tokio-runt
 serde = {version = "1", features = ["derive"]}
 
 # Gamelogs
-protobuf = "2.20"
+protobuf = "3.7"
 base62 = "0.3"
 regex = "1"
 lazy_static = "1"
@@ -32,4 +32,5 @@ time = { version = "0.3", features = ["local-offset"] }
 
 [build-dependencies]
 # Gamelog deserialization
-protobuf-codegen-pure = "2.20"
+protobuf-codegen = "3.7"
+protobuf-parse = "3.7"

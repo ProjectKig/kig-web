@@ -1,4 +1,4 @@
-use crate::protos::bp::{DeathEvent_PlayerDeathEvent, DeathEvent_PlayerDeathEvent_DeathCause};
+use crate::protos::bp::death_event::{player_death_event::DeathCause, PlayerDeathEvent};
 
 use super::{event::EventType, GameLogExtension};
 
@@ -36,13 +36,12 @@ impl GameLogExtension for BpExtension {
     }
 }
 
-impl DeathEvent_PlayerDeathEvent {
+impl PlayerDeathEvent {
     pub fn get_damage_desc(&self) -> &'static str {
-        use DeathEvent_PlayerDeathEvent_DeathCause as DeathEvent_DeathCause;
-        match self.get_death_cause() {
-            DeathEvent_DeathCause::VOID => "Void",
-            DeathEvent_DeathCause::DETECTION => "Void",
-            DeathEvent_DeathCause::UNKNOWN => "Unknown cause",
+        match self.death_cause() {
+            DeathCause::VOID => "Void",
+            DeathCause::DETECTION => "Void",
+            DeathCause::UNKNOWN => "Unknown cause",
         }
     }
 }

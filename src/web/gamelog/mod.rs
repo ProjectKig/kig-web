@@ -17,8 +17,8 @@ use crate::{
     db::GameLogMeta,
     error::Result,
     modes::GameMode,
-    protos::gamelog::{self, ChatEvent_ChatType, GameLog, TimeEvent},
-    web::get_current_year,
+    protos::gamelog::{self, chat_event::ChatType, GameLog, TimeEvent},
+    web::get_current_time,
     AppState,
 };
 use actix_web::{
@@ -32,6 +32,7 @@ use gamelog::{BukkitDamageCause, ChatEvent, GameEvent};
 use regex::Regex;
 use std::{borrow::Cow, str::FromStr};
 use std::{collections::HashMap, convert::TryInto, fmt, time::Duration};
+use time::UtcDateTime;
 
 mod bed;
 mod bp;
@@ -67,6 +68,7 @@ struct GamelogTemplate<'a> {
     extension: WrappedExtension,
     server: Option<String>,
     current_year: String,
+    nicks_hidden: bool,
 }
 
 // Extensions - each mode can implement its own version
@@ -81,7 +83,7 @@ pub trait GameLogExtension {
         true
     }
     fn get_map<'slf, 'log: 'slf>(&'slf self, log: &'log GameLog) -> Cow<str> {
-        Cow::Borrowed(log.get_map())
+        Cow::Borrowed(log.map())
     }
 }
 
@@ -189,47 +191,44 @@ pub async fn gamelog_by_id(
             let mode = GameMode::from_str(&mode).map_err(|_| crate::error::Error::ModeNotFound)?;
             let (log, meta) = get_log(state, mode, id.to_be_bytes()[2..].to_vec()).await?;
             let teams: Vec<Team> = log
-                .get_teams()
+                .teams
                 .iter()
                 .enumerate()
                 .map(|(i, t)| Team {
-                    name: t.get_name(),
-                    score: t.get_score(),
+                    name: t.name(),
+                    score: t.score(),
                     color: get_team_color(t, i),
                     players: t
-                        .get_players()
+                        .players
                         .iter()
                         .map(|p| Player {
-                            name: p.get_name(),
-                            uuid: p.get_uuid().into(),
-                            nick: p.has_nick().then(|| p.get_nick()),
+                            name: p.name(),
+                            uuid: p.uuid().into(),
+                            nick: p.has_nick().then(|| p.nick()),
                         })
                         .collect(),
                 })
                 .collect();
-            let winner = log
-                .has_winner()
-                .then(|| log.get_winner())
-                .and_then(|winner| {
-                    teams
-                        .iter()
-                        .find(|t| t.name == winner)
-                        .cloned()
-                        .or_else(|| {
-                            Some(Team {
-                                name: winner,
-                                color: "",
-                                score: 0,
-                                players: vec![],
-                            })
+            let winner = log.has_winner().then(|| log.winner()).and_then(|winner| {
+                teams
+                    .iter()
+                    .find(|t| t.name == winner)
+                    .cloned()
+                    .or_else(|| {
+                        Some(Team {
+                            name: winner,
+                            color: "",
+                            score: 0,
+                            players: vec![],
                         })
-                });
+                    })
+            });
 
             let extension = mode.to_gamelog_ext(&log);
             let extension_ptr = extension.clone().boxed();
 
             let events: Vec<WrappedEvent> = log
-                .get_events()
+                .events
                 .iter()
                 .enumerate()
                 .map(|(i, e)| WrappedEvent::parse(i, e, &*extension_ptr))
@@ -237,12 +236,21 @@ pub async fn gamelog_by_id(
 
             let player_teams = PlayerTeamMap::new(&teams, &events);
 
+            let current_time = get_current_time();
+            let nicks_hidden = if log.has_nick_embargo() && log.has_game_start() {
+                UtcDateTime::from_unix_timestamp(log.game_start()).is_ok_and(|game_time| {
+                    game_time + time::Duration::seconds(log.nick_embargo().into()) > current_time
+                })
+            } else {
+                false
+            };
+
             let render = GamelogTemplate {
                 log: &log,
-                total_players: if log.get_start_players() == 0 {
-                    log.get_teams().iter().map(|t| t.get_players().len()).sum()
+                total_players: if log.start_players() == 0 {
+                    log.teams.iter().map(|t| t.players.len()).sum()
                 } else {
-                    log.get_start_players() as usize
+                    log.start_players() as usize
                 },
                 game_id: &path_id,
                 teams: teams.clone(),
@@ -255,7 +263,8 @@ pub async fn gamelog_by_id(
                 },
                 extension,
                 server: meta.server,
-                current_year: get_current_year(),
+                current_year: current_time.year().to_string(),
+                nicks_hidden,
             }
             .render()
             .unwrap();
@@ -284,7 +293,7 @@ impl Functions {
 
 impl WrappedEvent {
     fn parse(id: usize, event: &TimeEvent, extension: &dyn GameLogExtension) -> Self {
-        let time = event.get_time();
+        let time = event.time();
         WrappedEvent {
             id,
             time,
@@ -294,7 +303,7 @@ impl WrappedEvent {
 
     /// Attempts to parse the event, interpreting it as a default event if possible.
     fn parse_event(event: &TimeEvent, extension: &dyn GameLogExtension) -> EventType {
-        let event = event.get_event();
+        let event = &event.event;
         match extension.parse_event(event) {
             EventType::Unknown => {
                 use crate::protos::gamelog::exts::*;
@@ -331,18 +340,18 @@ impl WrappedEvent {
         log: &GamelogTemplate<'a>,
     ) -> ChatChannel<'a> {
         if let EventType::Chat(chat_event) = &self.event {
-            match chat_event.get_field_type() {
-                ChatEvent_ChatType::LOBBY => ChatChannel::Static("Lobby"),
-                ChatEvent_ChatType::TEAM => if event.has_team() {
-                    log.teams.get(event.get_team() as usize)
+            match chat_event.type_() {
+                ChatType::LOBBY => ChatChannel::Static("Lobby"),
+                ChatType::TEAM => if event.has_team() {
+                    log.teams.get(event.team() as usize)
                 } else {
-                    log.player_teams.get_team_at(event.get_sender(), *event_id)
+                    log.player_teams.get_team_at(event.sender(), *event_id)
                 }
                 .map(|t| ChatChannel::Team(t.name, t.color))
                 .unwrap_or_else(|| ChatChannel::Team(SPECTATORS.name, SPECTATORS.color)),
-                ChatEvent_ChatType::SHOUT => ChatChannel::Static("Shout"),
-                ChatEvent_ChatType::BROADCAST => ChatChannel::Static("Broadcast"),
-                ChatEvent_ChatType::GLOBAL => ChatChannel::None,
+                ChatType::SHOUT => ChatChannel::Static("Shout"),
+                ChatType::BROADCAST => ChatChannel::Static("Broadcast"),
+                ChatType::GLOBAL => ChatChannel::None,
             }
         } else {
             ChatChannel::None
@@ -381,8 +390,8 @@ impl<'a> PlayerTeamMap<'a> {
         // Team change events
         for event in events {
             if let EventType::Join(join) = &event.event {
-                let player = join.get_player();
-                let team = teams.get(join.get_team() as usize).unwrap_or(&SPECTATORS);
+                let player = join.player();
+                let team = teams.get(join.team() as usize).unwrap_or(&SPECTATORS);
                 if let Some(teams) = res.0.get_mut(player) {
                     teams.push((event.id, team));
                 }
@@ -426,7 +435,7 @@ impl fmt::Display for UUID {
 
 fn get_team_color(team: &gamelog::Team, idx: usize) -> &'static str {
     mc_to_rgb(if team.has_color() {
-        team.get_color() as u8 as char
+        team.color() as u8 as char
     } else {
         DEFAULT_COLORS[idx]
     })

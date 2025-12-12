@@ -14,7 +14,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 fn main() {
-    protobuf_codegen_pure::Codegen::new()
+    protobuf_codegen::Codegen::new()
+        .pure()
         .out_dir("src/protos")
         .inputs(&[
             "protos/cai.proto",

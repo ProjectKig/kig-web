@@ -42,7 +42,6 @@ pub fn images_fallback() -> Files {
 }
 
 #[once(time = 3600)]
-fn get_current_year() -> String {
-    let time = OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc());
-    time.year().to_string()
+fn get_current_time() -> OffsetDateTime {
+    OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc())
 }
