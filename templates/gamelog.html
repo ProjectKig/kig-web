@@ -108,16 +108,15 @@
                                         {% endif %}
                                     </div>
                                     <div class="col">
-                                        {% if player.nick.is_some() %}
-                                            <span class="align-middle">{{ player.nick.unwrap() }}
-                                                {% if nicks_hidden %}
-                                                    <small>(<i>nick</i>)</small>
-                                                {% else %}
-                                                    <small>({{ player.name }})</small>
+                                        {% if player.nick.is_some() && nicks_hidden %}
+                                            <span class="align-middle">{{ player.nick.unwrap() }} <small>(<i>nick</i>)</small></span>
+                                        {% else %}
+                                            <span class="align-middle">
+                                                {{ player.name }}
+                                                {% if player.nick.is_some() && !nicks_hidden %}
+                                                    <small>({{ player.nick.unwrap() }})</small>
                                                 {% endif %}
                                             </span>
-                                        {% else %}
-                                            <span class="align-middle">{{ player.name }}</span>
                                         {% endif %}
                                     </div>
                                 </div>

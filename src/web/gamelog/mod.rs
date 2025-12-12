@@ -244,7 +244,7 @@ pub async fn gamelog_by_id(
 
             let current_time = get_current_time();
             let nicks_hidden = if log.has_nick_embargo() && log.has_game_start() {
-                UtcDateTime::from_unix_timestamp(log.game_start()).is_ok_and(|game_time| {
+                UtcDateTime::from_unix_timestamp(log.game_start() / 1000).is_ok_and(|game_time| {
                     game_time + time::Duration::seconds(log.nick_embargo().into()) > current_time
                 })
             } else {
