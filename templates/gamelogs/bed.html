@@ -5,7 +5,7 @@
 {% let team = t|team_from_idx(teams) %}
 Team <strong style="color: {{team.color}};">{{ team.name }}</strong>'s bed was destroyed
 {%- if bed_destroy.has_player() %}
-by <strong style="color: {{bed_destroy.player()|team_color(player_teams, evt_id)}};">{{ bed_destroy.player()
+by <strong style="color: {{bed_destroy.player()|team_color(player_teams, evt_id)}};">{{ bed_destroy.player()|player_name(self)
     }}</strong>
 {%- endif -%}.
 {% else %}

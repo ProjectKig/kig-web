@@ -1,7 +1,7 @@
 {% match match_evt %}
 {% when GravStageCompletion with (stage_completion) %}
 <i class="align-middle ri-play-circle-fill"></i>
-<strong>{{ stage_completion.player() }}</strong> finished <strong data-bs-toggle="tooltip" data-bs-placement="top"
+<strong>{{ stage_completion.player()|player_name(self) }}</strong> finished <strong data-bs-toggle="tooltip" data-bs-placement="top"
     title="{{ stage_completion.stage_index()|grav_stage_name(extension) }}">Stage {{
     stage_completion.stage_index() + 1
     }}</strong> in <strong>{{ stage_completion.time()|grav_format_time}}</strong>.
@@ -10,11 +10,11 @@
 {% endif %}
 {% when GravGameFinish with (game_finish) %}
 <i class="align-middle ri-star-fill"></i>
-<strong>{{ game_finish.player() }}</strong> finished <strong>#{{ game_finish.place() }}</strong> in <strong>{{
+<strong>{{ game_finish.player()|player_name(self) }}</strong> finished <strong>#{{ game_finish.place() }}</strong> in <strong>{{
     game_finish.time()|grav_format_time}}</strong>.
 {% when GravHardcoreFail with (hardcore_fail) %}
 <i class="align-middle ri-close-line"></i>
-<strong>{{ hardcore_fail.player() }}</strong> died in <strong>Hardcore Mode</strong> on <strong
+<strong>{{ hardcore_fail.player()|player_name(self) }}</strong> died in <strong>Hardcore Mode</strong> on <strong
     data-bs-toggle="tooltip" data-bs-placement="top"
     title="{{ hardcore_fail.stage()|grav_stage_name(extension) }}">Stage {{
     hardcore_fail.stage() + 1

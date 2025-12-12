@@ -169,7 +169,7 @@
                             {% when ChatChannel::None %}
                             {% endmatch %}
                             <span style="color: {{chat.sender()|team_color(player_teams, evt_id)}};"><strong>{{
-                                    chat.sender() }}</strong></span>:
+                                    chat.sender()|player_name(self) }}</strong></span>:
                             {{ chat.message() }}
                             {% let count = chat.count() %}
                             {% if count > 1 %}
@@ -179,13 +179,13 @@
                             {% let jt = join.team() %}
                             {% let team = jt|team_from_idx(teams) %}
                             <i class="align-middle ri-user-add-fill"></i>
-                            <strong>{{ join.player() }}</strong> joined the <strong
+                            <strong>{{ join.player()|player_name(self) }}</strong> joined the <strong
                                 style="color: {{team.color}};">{{ team.name }}</strong>
                             team.
                             {% when Leave with (leave) %}
                             <i class="align-middle ri-user-unfollow-fill"></i>
                             <strong style="color: {{leave.player()|team_color(player_teams, evt_id)}};">{{
-                                leave.player() }}</strong> left.
+                                leave.player()|player_name(self) }}</strong> left.
                             {% else %}
                             {% include "gamelogs/herd.html" %}
                             {% match mode %}

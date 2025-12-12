@@ -69,6 +69,7 @@ struct GamelogTemplate<'a> {
     server: Option<String>,
     current_year: String,
     nicks_hidden: bool,
+    player_display_names: HashMap<String, String>,
 }
 
 // Extensions - each mode can implement its own version
@@ -235,6 +236,11 @@ pub async fn gamelog_by_id(
                 .collect();
 
             let player_teams = PlayerTeamMap::new(&teams, &events);
+            let player_display_names = teams
+                .iter()
+                .flat_map(|t| t.players.iter())
+                .map(|p| (p.name.to_string(), p.nick.unwrap_or(p.name).to_string()))
+                .collect();
 
             let current_time = get_current_time();
             let nicks_hidden = if log.has_nick_embargo() && log.has_game_start() {
@@ -265,6 +271,7 @@ pub async fn gamelog_by_id(
                 server: meta.server,
                 current_year: current_time.year().to_string(),
                 nicks_hidden,
+                player_display_names,
             }
             .render()
             .unwrap();
@@ -476,7 +483,7 @@ fn format_duration(millis: i32) -> String {
 }
 
 mod filters {
-    use crate::web::gamelog::PlayerTeamMap;
+    use crate::web::gamelog::{GamelogTemplate, PlayerTeamMap};
 
     pub use super::grav::filters::*;
     use std::borrow::Cow;
@@ -498,6 +505,25 @@ mod filters {
         let mut res: String = super::MAP_ESCAPE_REGEX.replace_all(map_name, "").into();
         res.make_ascii_lowercase();
         Ok(res)
+    }
+
+    pub fn player_name<'a>(player: &'a str, log: &'a GamelogTemplate) -> askama::Result<&'a str> {
+        Ok(log
+            .player_display_names
+            .get(player)
+            .map(|s| s.as_str())
+            .unwrap_or(player))
+    }
+
+    pub fn player_names<'a>(
+        players: impl IntoIterator<Item = &'a String>,
+        log: &'a GamelogTemplate,
+    ) -> askama::Result<String> {
+        let to_join = players
+            .into_iter()
+            .map(|p| player_name(p, log))
+            .collect::<askama::Result<Vec<&str>>>()?;
+        Ok(to_join.join(", "))
     }
 
     pub fn team_from_idx<'a>(idx: &'a i32, teams: &'a [Team<'a>]) -> askama::Result<&'a Team<'a>> {

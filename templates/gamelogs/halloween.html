@@ -2,11 +2,11 @@
 {% when HalloweenDeath with (death) %}
 <i class="align-middle ri-close-line"></i>
 {% if death.has_killer() %}
-<strong>{{ death.player() }}</strong>
+<strong>{{ death.player()|player_name(self) }}</strong>
 was killed by
-<strong>{{ death.killer() }}</strong>.
+<strong>{{ death.killer()|player_name(self) }}</strong>.
 {% else %}
-<strong>{{ death.player() }}</strong>
+<strong>{{ death.player()|player_name(self) }}</strong>
 died.
 {% endif %}
 {% if death.has_last_damage_cause() %}

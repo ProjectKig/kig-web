@@ -2,11 +2,11 @@
 {% when HerdDeath with (death) %}
 <i class="align-middle ri-close-line"></i>
 {% if death.has_killer() %}
-<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player() }}</strong>
+<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player()|player_name(self) }}</strong>
 was killed by
-<strong style="color: {{death.killer()|team_color(player_teams, evt_id)}};">{{ death.killer() }}</strong>.
+<strong style="color: {{death.killer()|team_color(player_teams, evt_id)}};">{{ death.killer()|player_name(self) }}</strong>.
 {% else %}
-<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player() }}</strong>
+<strong style="color: {{death.player()|team_color(player_teams, evt_id)}};">{{ death.player()|player_name(self) }}</strong>
 died.
 {% endif %}
 <span class="badge rounded-pill bg-secondary">{{ death.get_damage_desc() }}</span>
