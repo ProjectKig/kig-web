@@ -26,6 +26,7 @@ fn main() {
             "protos/herd.proto",
             "protos/bed.proto",
             "protos/halloween.proto",
+            "protos/turf.proto",
         ])
         .include("protos")
         .run()

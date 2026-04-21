@@ -9,6 +9,7 @@ pub enum GameMode {
     Halloween2023,
     Halloween2024,
     Halloween2025,
+    Turf2026
 }
 
 impl GameMode {
@@ -22,6 +23,7 @@ impl GameMode {
             GameMode::Halloween2023 => "Kig-o'-ween (2023)",
             GameMode::Halloween2024 => "Kig-o'-ween (2024)",
             GameMode::Halloween2025 => "Kig-o'-ween (2025)",
+            GameMode::Turf2026 => "Turf Wars (2026)",
         }
     }
 
@@ -35,6 +37,7 @@ impl GameMode {
             GameMode::Halloween2023 => "halloween2023",
             GameMode::Halloween2024 => "halloween2024",
             GameMode::Halloween2025 => "halloween2025",
+            GameMode::Turf2026 => "turf2026",
         }
     }
 }

@@ -1,0 +1,31 @@
+syntax = "proto2";
+
+package kig.turf;
+
+import "gamelog.proto";
+
+message LogExtension {
+  extend kigcore.GameLog {
+    optional LogExtension extension = 118;
+  }
+}
+
+enum PhaseType {
+  Build = 0;
+  Fight = 1;
+}
+
+extend kigcore.GameEvent {
+  optional DeathEvent death = 111;
+  optional PhaseEvent phase = 112;
+}
+
+message PhaseEvent {
+  required PhaseType phase_type = 1;
+  required int32 tiles_per_kill = 2;
+}
+
+message DeathEvent {
+  required string player = 1;
+  optional string killer = 2;
+}

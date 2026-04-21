@@ -1,5 +1,5 @@
 use crate::protos::gamelog as log;
-use crate::protos::{bed, bp, cai, grav, halloween, herd, timv};
+use crate::protos::{bed, bp, cai, grav, halloween, herd, timv, turf};
 
 pub enum EventType {
     Unknown,
@@ -45,4 +45,8 @@ pub enum EventType {
 
     // Halloween events
     HalloweenDeath(halloween::DeathEvent),
+
+    // Turf events
+    TurfDeath(turf::DeathEvent),
+    TurfPhase(turf::PhaseEvent),
 }

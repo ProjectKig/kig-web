@@ -11,7 +11,7 @@ message LogExtension {
 }
 
 extend kigcore.GameEvent {
-    optional DeathEvent death = 111;
+  optional DeathEvent death = 111;
 }
 
 message DeathEvent {

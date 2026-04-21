@@ -41,6 +41,7 @@ mod event;
 mod grav;
 mod halloween;
 mod timv;
+mod turf;
 
 lazy_static::lazy_static! {
     static ref MAP_ESCAPE_REGEX: Regex = Regex::new(r#"[^a-zA-Z0-9]"#).unwrap();
@@ -96,6 +97,7 @@ pub enum WrappedExtension {
     Grav(grav::GravExtension),
     Bed(bed::BedExtension),
     Halloween(halloween::HalloweenExtension),
+    Turf(turf::TurfExtension),
 }
 
 impl WrappedExtension {
@@ -108,6 +110,7 @@ impl WrappedExtension {
             Grav(ext) => Box::new(ext),
             Bed(ext) => Box::new(ext),
             Halloween(ext) => Box::new(ext),
+            Turf(ext) => Box::new(ext),
         }
     }
 }
@@ -124,6 +127,7 @@ impl GameMode {
             GameMode::Halloween2023 | GameMode::Halloween2024 | GameMode::Halloween2025 => {
                 Halloween(halloween::HalloweenExtension {})
             }
+            GameMode::Turf2026 => Turf(turf::TurfExtension {}),
         }
     }
 }

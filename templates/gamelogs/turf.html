@@ -1,0 +1,16 @@
+{% match match_evt %}
+{% when TurfPhase with (phase) %}
+<i class="align-middle ri-play-circle-fill"></i>
+<strong>{{ phase.name() }}</strong> phase started with {{ phase.tiles_per_kill() }} tile(s) per kill.
+{% when TurfDeath with (death) %}
+<i class="align-middle ri-close-line"></i>
+{% if death.has_killer() %}
+<strong>{{ death.player()|player_name(self) }}</strong>
+was killed by
+<strong>{{ death.killer()|player_name(self) }}</strong>.
+{% else %}
+<strong>{{ death.player()|player_name(self) }}</strong>
+died.
+{% endif %}
+{% else %}
+{% endmatch %}
