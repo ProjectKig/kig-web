@@ -32,6 +32,11 @@ pub struct GameLogMeta {
     pub server: Option<String>,
 }
 
+#[derive(serde::Deserialize)]
+struct User {
+    pub name: String,
+}
+
 impl DbHandle {
     pub async fn new() -> Result<DbHandle> {
         let uri = std::env::var("KIG_MONGO_URI")
@@ -69,14 +74,15 @@ impl DbHandle {
 
     pub async fn draw_image_by_id(&self, id: Vec<u8>) -> Result<Option<DrawImage>> {
         let filter = doc! {"_id": Self::bytes(id)};
-        let res: Option<Result<DrawImage>> = self
+        let mut res: Option<Result<DrawImage>> = self
             .client
             .collection::<Document>("draw_images")
             .find_one(filter)
             .await?
             .map(|mut doc| {
                 Ok(DrawImage {
-                    drawer: doc.get_str("drawer")?.to_string(),
+                    drawer_id: doc.get_str("drawer")?.to_string(),
+                    drawer_name: String::new(),
                     word: doc.get_str("word")?.to_string(),
                     report_key: doc
                         .get_binary_generic_mut("report_key")
@@ -85,6 +91,15 @@ impl DbHandle {
                     image: std::mem::take(doc.get_binary_generic_mut("image")?),
                 })
             });
+        if let Some(Ok(res)) = res.as_mut() {
+            res.drawer_name = self
+                .client
+                .collection::<User>("users")
+                .find_one(doc! { "uuid": &res.drawer_id })
+                .await?
+                .map(|r| r.name)
+                .unwrap_or_else(|| "(Unknown)".to_string());
+        }
         res.transpose()
     }
 
