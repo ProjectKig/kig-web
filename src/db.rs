@@ -15,10 +15,11 @@
 
 use crate::error::Result;
 use crate::protos::gamelog::GameLog;
-use mongodb::bson::{bson, doc};
+use crate::web::draw::DrawImage;
+use mongodb::bson::{Document, bson, doc};
 use mongodb::{
-    bson::{Binary, Bson},
     Client, Database,
+    bson::{Binary, Bson},
 };
 use protobuf::Message;
 
@@ -49,11 +50,11 @@ impl DbHandle {
         game: &str,
         id: Vec<u8>,
     ) -> Result<Option<(GameLog, GameLogMeta)>> {
-        let filter = Some(doc! {"game_id": Self::bytes(id)});
+        let filter = doc! {"game_id": Self::bytes(id)};
         let res: Option<Result<(GameLog, GameLogMeta)>> = self
             .client
-            .collection(&format!("gamelogs_{}", game))
-            .find_one(filter, None)
+            .collection::<Document>(&format!("gamelogs_{}", game))
+            .find_one(filter)
             .await?
             .map(|doc| {
                 Ok((
@@ -62,6 +63,27 @@ impl DbHandle {
                         server: doc.get_str("server").map(Into::into).ok(),
                     },
                 ))
+            });
+        res.transpose()
+    }
+
+    pub async fn draw_image_by_id(&self, id: Vec<u8>) -> Result<Option<DrawImage>> {
+        let filter = doc! {"_id": Self::bytes(id)};
+        let res: Option<Result<DrawImage>> = self
+            .client
+            .collection::<Document>("draw_images")
+            .find_one(filter)
+            .await?
+            .map(|mut doc| {
+                Ok(DrawImage {
+                    drawer: doc.get_str("drawer")?.to_string(),
+                    word: doc.get_str("word")?.to_string(),
+                    report_key: doc
+                        .get_binary_generic_mut("report_key")
+                        .map(std::mem::take)
+                        .ok(),
+                    image: std::mem::take(doc.get_binary_generic_mut("image")?),
+                })
             });
         res.transpose()
     }

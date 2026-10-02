@@ -14,15 +14,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use actix_files::Files;
-use actix_web::{web, Scope};
+use actix_web::{Scope, web};
 use cached::proc_macro::once;
 use std::time::Duration;
 use time::OffsetDateTime;
 
+pub mod draw;
 mod gamelog;
 
 pub fn add_routes() -> Scope {
-    web::scope("/").route("/game/{mode}/{id}", web::get().to(gamelog::gamelog_by_id))
+    web::scope("")
+        .route("/game/{mode}/{id}", web::get().to(gamelog::gamelog_by_id))
+        .route("/sketch/{id}", web::get().to(draw::page_by_id))
+        .route("/sketch/img/{id}", web::get().to(draw::image_by_id))
 }
 
 pub fn static_files() -> Files {

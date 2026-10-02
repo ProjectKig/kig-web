@@ -14,19 +14,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
+    AppState,
     db::GameLogMeta,
     error::Result,
     modes::GameMode,
-    protos::gamelog::{self, chat_event::ChatType, GameLog, TimeEvent},
+    protos::gamelog::{self, GameLog, TimeEvent, chat_event::ChatType},
     web::get_current_time,
-    AppState,
 };
-use actix_web::{
-    http::header::{ContentType, IntoHeaderValue},
-    web, HttpResponse,
-};
+use actix_web::{HttpResponse, http::header::ContentType, web};
 use askama::Template;
-use cached::{proc_macro::cached, TimedCache};
+use cached::{TimedCache, proc_macro::cached};
 use event::EventType::{self, *};
 use gamelog::{BukkitDamageCause, ChatEvent, GameEvent};
 use regex::Regex;
@@ -188,8 +185,9 @@ async fn get_log(
 
 pub async fn gamelog_by_id(
     state: web::Data<AppState>,
-    web::Path((mut mode, path_id)): web::Path<(String, String)>,
+    path: web::Path<(String, String)>,
 ) -> Result<HttpResponse> {
+    let (mut mode, path_id) = path.into_inner();
     match base62::decode(&path_id) {
         Ok(id) => {
             mode.make_ascii_uppercase();
@@ -283,7 +281,7 @@ pub async fn gamelog_by_id(
             .render()
             .unwrap();
             Ok(HttpResponse::Ok()
-                .content_type(IntoHeaderValue::try_into(ContentType::html()).unwrap())
+                .content_type(ContentType::html())
                 .body(render))
         }
         Err(_) => Ok(HttpResponse::BadRequest().body("Invalid game ID")),

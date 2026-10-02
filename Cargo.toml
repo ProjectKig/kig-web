@@ -2,14 +2,14 @@
 name = "kig-web"
 version = "0.1.0"
 authors = ["RoccoDev <hey@rocco.dev>"]
-edition = "2018"
+edition = "2024"
 
 [dependencies]
 # Async runtime
 tokio = { version = "1", features = ["full"] }
 
 # Database
-mongodb = { version = "1.1.1", default-features = false, features = ["tokio-runtime"]}
+mongodb = { version = "3.9.1" }
 serde = {version = "1", features = ["derive"]}
 
 # Gamelogs
@@ -18,12 +18,17 @@ base62 = "0.3"
 regex = "1"
 lazy_static = "1"
 
+# Drawings
+rust-base62 = "0.2"
+image = "0.25.10"
+
 # Web server
 askama = "0.10"
 askama_derive = "0.10"
-actix-web = "3"
+actix-web = { version = "4.13" }
+actix-rt = { version = "2", features = ["net"] } # wont compile without (?)
 cached = { version = "0.56", features = ["async"] }
-actix-files = "0.5"
+actix-files = "0.7"
 
 # Misc
 strum = "0.20"

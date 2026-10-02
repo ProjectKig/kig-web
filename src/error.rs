@@ -15,7 +15,7 @@
 
 use std::fmt::Display;
 
-use actix_web::{dev::Body, http::StatusCode, HttpResponse, ResponseError};
+use actix_web::{HttpResponse, ResponseError, body::BoxBody, http::StatusCode};
 use mongodb::bson::document::ValueAccessError;
 use protobuf::Error as ProtobufError;
 
@@ -28,6 +28,7 @@ pub enum Error {
     Protobuf(ProtobufError),
     ModeNotFound,
     NotFound,
+    BadImage,
 }
 
 impl Display for Error {
@@ -45,7 +46,7 @@ impl ResponseError for Error {
     }
 
     fn error_response(&self) -> actix_web::HttpResponse {
-        HttpResponse::new(self.status_code()).set_body(Body::from_slice(
+        HttpResponse::new(self.status_code()).set_body(BoxBody::new(
             match self {
                 Error::NotFound => "Not found",
                 Error::ModeNotFound => "Mode not found",
