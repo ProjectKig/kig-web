@@ -109,8 +109,8 @@ fn validate_auth(image: &DrawImage, auth: &Auth) -> Result<()> {
     }
 }
 
-fn decode_id(id: &str, expected_length: usize) -> Result<Vec<u8>> {
-    if id.len() != expected_length {
+fn decode_id(id: &str, max_length: usize) -> Result<Vec<u8>> {
+    if id.len() > max_length {
         return Err(ErrorBadRequest("invalid id"));
     }
     rust_base62::decode(id.as_bytes()).map_err(|_| ErrorBadRequest("invalid id"))
