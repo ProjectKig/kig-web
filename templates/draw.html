@@ -15,10 +15,43 @@
     <meta name="og:image" content="{{ image_url }}">
     <meta name="og:description"
         content="View this drawing of {{ image.word }} by {{ image.drawer_name }}. Play Sketch on playkig.com!">
+    <meta name="og:url" content="{{ image_url }}">
     <meta name="og:site_name" content="KIG Network">
-    <meta name="twitter:card" content="summary">
-    <meta name="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ image_url }}">
+    <meta name="og:type" content="article">
     <meta name="theme-color" content="#f7b32a">
+
+    <script id="discord:component-embed" type="application/vnd.discord.component-embed+json">
+        {
+            "component": {
+                "type": 17,
+                "components": [
+                    {
+                        "type": 9,
+                        "components": [
+                            {
+                                "type": 10,
+                                "content": "# {{image.word}}\nby {{ image.drawer_name }}"
+                            }
+                        ],
+                        "accessory": {
+                            "type": 2,
+                            "style": 5,
+                            "url": "https://playkig.com",
+                            "label": "Play Sketch!"
+                        }
+                    },
+                    {
+                        "type": 12,
+                        "items": [
+                            { "media": {"url": "{{ image_url }}"}}
+                        ]
+                    }
+                ]
+            }
+        }
+    </script>
 </head>
 
 <body class="d-flex container justify-content-center align-items-center text-center" style="height: 100vh;">
