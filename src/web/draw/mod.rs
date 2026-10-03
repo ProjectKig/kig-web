@@ -22,7 +22,7 @@ use actix_web::{
 use askama::Template;
 use cached::{TimedCache, proc_macro::cached};
 use image::{ImageFormat, ImageReader, imageops::FilterType};
-use std::{io::Cursor, time::Duration};
+use std::{cmp::Ordering, io::Cursor, time::Duration};
 
 use crate::{AppState, web::get_current_time};
 
@@ -110,10 +110,19 @@ fn validate_auth(image: &DrawImage, auth: &Auth) -> Result<()> {
 }
 
 fn decode_id(id: &str, max_length: usize) -> Result<Vec<u8>> {
-    if id.len() > max_length {
-        return Err(ErrorBadRequest("invalid id"));
+    match id.len().cmp(&max_length) {
+        Ordering::Equal => rust_base62::decode(id.as_bytes()),
+        Ordering::Less => {
+            // properly handle leading zeroes
+            let mut buf = vec![b'0'; max_length];
+            buf[(max_length - id.len())..max_length].copy_from_slice(id.as_bytes());
+            rust_base62::decode(&buf)
+        }
+        Ordering::Greater => {
+            return Err(ErrorBadRequest("invalid id"));
+        }
     }
-    rust_base62::decode(id.as_bytes()).map_err(|_| ErrorBadRequest("invalid id"))
+    .map_err(|_| ErrorBadRequest("invalid id"))
 }
 
 #[cached(
